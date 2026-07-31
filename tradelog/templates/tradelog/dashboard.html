@@ -11,15 +11,29 @@
     </div>
 
     <!-- SECTION 2: ALGOS & ML WORKSPACES -->
-    <div id="ml-technical-section" class="tab-content-area d-none">
-        <div class="glass-card p-4"><h5 class="text-white fw-bold">Technical Analysis ML Workspace</h5></div>
+
+<!-- 1. Technical Analysis & Quantitative Screener Workspace -->
+<div id="ml-technical-section" class="tab-content-area d-block">
+    <div class="mb-4">
+        {% include 'tradelog/include/stock_screener.html' %}
     </div>
-    <div id="ml-sentiment-section" class="tab-content-area d-none">
-        <div class="glass-card p-4"><h5 class="text-white fw-bold">Sentiment Analysis NLP Workspace</h5></div>
+</div>
+
+<!-- 2. Sentiment Analysis NLP Workspace -->
+<div id="ml-sentiment-section" class="tab-content-area d-none">
+    <div class="glass-card p-4 rounded-4 border border-secondary bg-dark text-white shadow-lg">
+        <h5 class="fw-bold mb-2"><i class="bi bi-chat-square-quote text-info me-2"></i>Sentiment Analysis NLP Workspace</h5>
+        <p class="text-secondary small mb-0">Real-time market sentiment scoring, news impact analytics, and NLP signals.</p>
     </div>
-    <div id="ml-fundamental-section" class="tab-content-area d-none">
-        <div class="glass-card p-4"><h5 class="text-white fw-bold">Fundamental Macro Workspace</h5></div>
+</div>
+
+<!-- 3. Fundamental Macro Workspace -->
+<div id="ml-fundamental-section" class="tab-content-area d-none">
+    <div class="glass-card p-4 rounded-4 border border-secondary bg-dark text-white shadow-lg">
+        <h5 class="fw-bold mb-2"><i class="bi bi-globe2 text-warning me-2"></i>Fundamental Macro Workspace</h5>
+        <p class="text-secondary small mb-0">Macroeconomic data trends, interest rate tracking, and fundamental valuation metrics.</p>
     </div>
+</div>
 
     <!-- SECTION 3: LEARNING CENTER -->
     <div id="learn-technical-section" class="tab-content-area d-none">
@@ -79,6 +93,27 @@
         document.querySelectorAll('.nav-link-custom').forEach(el => el.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
+}
+</script>
+<script>
+function switchWorkspace(targetId, btnElement) {
+    // Hide all workspace sections
+    document.querySelectorAll('.tab-content-area').forEach(el => {
+        el.classList.add('d-none');
+        el.classList.remove('d-block');
+    });
+
+    // Show selected workspace section
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) {
+        targetSection.classList.remove('d-none');
+        targetSection.classList.add('d-block');
+    }
+
+    // Update active class on buttons
+    const parentContainer = btnElement.parentElement;
+    parentContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
 }
 </script>
 {% endblock %}

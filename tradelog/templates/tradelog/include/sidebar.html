@@ -14,11 +14,11 @@
 
         <!-- ALGOS & MACHINE LEARNING -->
         <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Algos & Machine Learning</div>
-        <a href="#ml-technical-section" class="nav-link-custom" onclick="switchTab(event, 'ml-technical-section')">
-            <i class="bi bi-graph-up"></i> Technical Analysis
-        </a>
+        <a href="{% url 'stock_screener' %}" class="nav-link text-white-50">
+    <i class="bi bi-funnel me-2"></i> Stock Screener
+</a>
         <a href="#ml-sentiment-section" class="nav-link-custom" onclick="switchTab(event, 'ml-sentiment-section')">
-            <i class="bi bi-chat-square-quote"></i> Sentiment Analysis
+            <i class="bi bi-chat-square-quote"></i> Stocks ML models
         </a>
         <a href="#ml-fundamental-section" class="nav-link-custom" onclick="switchTab(event, 'ml-fundamental-section')">
             <i class="bi bi-briefcase"></i> Fundamental Analysis

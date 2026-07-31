@@ -1,0 +1,78 @@
+<!-- NSE Stock Screener Component -->
+<div class="card bg-dark border-secondary p-4 rounded-4 shadow-lg mb-4" id="stock-screener-section">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold text-white m-0">NSE Stock Screener</h3>
+            <p class="text-secondary small mb-0 mt-1">Live market filtering for Nairobi Securities Exchange equities (KSh)</p>
+        </div>
+        <span class="badge bg-black border border-warning text-warning px-3 py-2">
+            Matched: {{ total_count|default:0 }}
+        </span>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card bg-black border-secondary p-3 mb-4 rounded-3 shadow">
+        <form method="get" action="{% url 'dashboard' %}#stock-screener-section" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label text-secondary small fw-bold">Min Price (KSh)</label>
+                <input type="number" name="min_price" value="{{ min_price }}" placeholder="0.00" step="any" class="form-control bg-dark text-white border-secondary">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label text-secondary small fw-bold">Max Price (KSh)</label>
+                <input type="number" name="max_price" value="{{ max_price }}" placeholder="1000.00" step="any" class="form-control bg-dark text-white border-secondary">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-secondary small fw-bold">Performance</label>
+                <select name="performance" class="form-select bg-dark text-white border-secondary">
+                    <option value="ALL" {% if performance_filter == 'ALL' %}selected{% endif %}>All Securities</option>
+                    <option value="GAINERS" {% if performance_filter == 'GAINERS' %}selected{% endif %}>Top Gainers (+)</option>
+                    <option value="LOSERS" {% if performance_filter == 'LOSERS' %}selected{% endif %}>Top Losers (-)</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-warning w-100 fw-bold">
+                    Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card bg-black border-secondary rounded-3 shadow">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="table-borderless border-bottom border-secondary text-secondary extra-small text-uppercase">
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Security Name</th>
+                        <th>Price (KSh)</th>
+                        <th>24h Change</th>
+                        <th>Volume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in stocks %}
+                    <tr>
+                        <td class="fw-bold text-warning">{{ item.ticker }}</td>
+                        <td class="text-white">{{ item.name }}</td>
+                        <td class="fw-bold">KSh {{ item.price|floatformat:2 }}</td>
+                        <td class="{% if item.change > 0 %}text-success{% elif item.change < 0 %}text-danger{% else %}text-secondary{% endif %} fw-bold">
+                            {% if item.change > 0 %}+{% endif %}{{ item.change|floatformat:2 }}%
+                        </td>
+                        <td class="text-secondary small">{{ item.volume }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-secondary">
+                            No securities found matching your screening criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

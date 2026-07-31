@@ -117,3 +117,40 @@ def currency_converter_view(request):
     Renders the Currency Converter resource page.
     """
     return render(request, 'tradelog/currency_converter.html')
+
+from django.shortcuts import render
+from .services.nse_service import fetch_nse_market_data
+
+
+
+
+
+def nse_screener_view(request):
+    all_stocks = fetch_nse_market_data()
+
+    # Get search/filter inputs from GET request
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    performance_filter = request.GET.get('performance', 'ALL')
+
+    filtered_stocks = []
+
+    min_p = float(min_price) if min_price else 0.0
+    max_p = float(max_price) if max_price else 1000000.0
+
+    for stock in all_stocks:
+        if min_p <= stock['price'] <= max_p:
+            if performance_filter == 'GAINERS' and stock['change'] <= 0:
+                continue
+            if performance_filter == 'LOSERS' and stock['change'] >= 0:
+                continue
+            filtered_stocks.append(stock)
+
+    context = {
+        'stocks': filtered_stocks,
+        'min_price': min_price,
+        'max_price': max_price,
+        'performance_filter': performance_filter,
+        'total_count': len(filtered_stocks)
+    }
+    return render(request, 'tradelog/stock_screener.html', context)
