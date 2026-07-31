@@ -138,14 +138,6 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  
 
-STORAGES = {
-    "default": {
-        "ENGINE": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "ENGINE": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
 
 # settings.py
 
@@ -157,3 +149,14 @@ LOGIN_REDIRECT_URL = "dashboard"
 
 # Where to send users after logging out
 LOGOUT_REDIRECT_URL = "login"
+
+# settings.py
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",  # Or "django.contrib.staticfiles.storage.StaticFilesStorage"
+    },
+}
