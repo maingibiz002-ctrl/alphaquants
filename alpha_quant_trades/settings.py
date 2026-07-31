@@ -32,7 +32,7 @@ load_dotenv(BASE_DIR / '.env')
 
 # Read secret key and debug mode from environment variables
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-development-key-change-me')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 
 
 
