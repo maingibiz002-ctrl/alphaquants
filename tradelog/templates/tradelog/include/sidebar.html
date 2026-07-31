@@ -1,4 +1,5 @@
 <aside class="app-sidebar p-3 d-none d-md-flex flex-column" style="width: 260px; flex-shrink: 0;">
+    <!-- BRAND HEADER -->
     <div class="d-flex align-items-center gap-2 mb-4 px-2">
         <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold user-avatar-badge">
             <i class="bi bi-activity"></i>
@@ -6,58 +7,110 @@
         <span class="fw-bold fs-5 text-white">AlphaQuant</span>
     </div>
 
+    <!-- NAVIGATION LINKS -->
     <nav class="d-flex flex-column gap-1 overflow-y-auto style-scrollbar pe-1" style="max-height: calc(100vh - 120px);">
+        
         <!-- DASHBOARD -->
-        <a href="#overview-section" class="nav-link-custom active" onclick="switchTab(event, 'overview-section')">
-            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        <a href="#overview-section" 
+           id="nav-overview" 
+           class="nav-link-custom active" 
+           onclick="switchTab(event, 'overview-section')">
+            <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
         </a>
 
         <!-- ALGOS & MACHINE LEARNING -->
         <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Algos & Machine Learning</div>
-        <a href="{% url 'stock_screener' %}" class="nav-link text-white-50">
-    <i class="bi bi-funnel me-2"></i> Stock Screener
-</a>
-        <a href="#ml-sentiment-section" class="nav-link-custom" onclick="switchTab(event, 'ml-sentiment-section')">
-            <i class="bi bi-chat-square-quote"></i> Stocks ML models
+
+        <a href="#stock-screener-section" 
+           id="nav-screener" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'stock-screener-section')">
+            <i class="bi bi-funnel-fill me-2"></i> Stock Screener
         </a>
-        <a href="#ml-fundamental-section" class="nav-link-custom" onclick="switchTab(event, 'ml-fundamental-section')">
-            <i class="bi bi-briefcase"></i> Fundamental Analysis
+
+        <a href="#stocks-ml-section" 
+           id="nav-stocks-ml" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'stocks-ml-section')">
+            <i class="bi bi-cpu-fill me-2"></i> Stocks ML models
+        </a>
+
+        <a href="#fundamental-analysis-section" 
+           id="nav-fundamental" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'fundamental-analysis-section')">
+            <i class="bi bi-briefcase me-2"></i> Fundamental Analysis
         </a>
 
         <!-- LEARNING CENTER -->
         <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Learning Center</div>
-        <a href="#learn-technical-section" class="nav-link-custom" onclick="switchTab(event, 'learn-technical-section')">
-            <i class="bi bi-book"></i> Technical Analysis
+
+        <a href="#learn-technical-section" 
+           id="nav-learn-technical" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'learn-technical-section')">
+            <i class="bi bi-book me-2"></i> Technical Analysis
         </a>
-        <a href="#learn-fundamental-section" class="nav-link-custom" onclick="switchTab(event, 'learn-fundamental-section')">
-            <i class="bi bi-journal-text"></i> Fundamental Analysis
+
+        <a href="#learn-fundamental-section" 
+           id="nav-learn-fundamental" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'learn-fundamental-section')">
+            <i class="bi bi-journal-text me-2"></i> Fundamental Analysis
         </a>
-        <a href="#learn-sentiment-section" class="nav-link-custom" onclick="switchTab(event, 'learn-sentiment-section')">
-            <i class="bi bi-newspaper"></i> Sentiment Analysis
+
+        <a href="#learn-sentiment-section" 
+           id="nav-learn-sentiment" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'learn-sentiment-section')">
+            <i class="bi bi-newspaper me-2"></i> Sentiment Analysis
         </a>
-        <a href="#learn-psychology-section" class="nav-link-custom" onclick="switchTab(event, 'learn-psychology-section')">
-            <i class="bi bi-brain"></i> Trading Psychology
+
+        <a href="#learn-psychology-section" 
+           id="nav-learn-psychology" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'learn-psychology-section')">
+            <i class="bi bi-brain me-2"></i> Trading Psychology
         </a>
 
         <!-- RESOURCES HUB -->
         <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Resources</div>
-        <a href="#journal-section" class="nav-link-custom" onclick="switchTab(event, 'journal-section')">
-            <i class="bi bi-journal-bookmark-fill"></i> Trading Journal
+
+        <a href="#journal-section" 
+           id="nav-journal" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'journal-section')">
+            <i class="bi bi-journal-bookmark-fill me-2"></i> Trading Journal
         </a>
-        <a href="#indicators-section" class="nav-link-custom" onclick="switchTab(event, 'indicators-section')">
-            <i class="bi bi-code-slash"></i> Indicators
+
+        <a href="#indicators-section" 
+           id="nav-indicators" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'indicators-section')">
+            <i class="bi bi-code-slash me-2"></i> Indicators
         </a>
-        <a href="#blogs-section" class="nav-link-custom" onclick="switchTab(event, 'blogs-section')">
-            <i class="bi bi-quote"></i> Blogs & Insights
-        <a href="#" class="nav-link-custom" onclick="switchTab(event, 'converter-section')">
-    <i class="bi bi-currency-exchange me-2"></i> Currency Converter
-</a>
-    </a>
+
+        <a href="#blogs-section" 
+           id="nav-blogs" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'blogs-section')">
+            <i class="bi bi-quote me-2"></i> Blogs & Insights
+        </a>
+
+        <a href="#converter-section" 
+           id="nav-converter" 
+           class="nav-link-custom" 
+           onclick="switchTab(event, 'converter-section')">
+            <i class="bi bi-currency-exchange me-2"></i> Currency Converter
+        </a>
+
     </nav>
 
+    <!-- FOOTER LOGOUT -->
     <div class="mt-auto pt-3">
         <a href="/admin/logout/" class="nav-link-custom text-secondary border-0 bg-transparent">
-            <i class="bi bi-box-arrow-left"></i> Logout
+            <i class="bi bi-box-arrow-left me-2"></i> Logout
         </a>
     </div>
 </aside>
+

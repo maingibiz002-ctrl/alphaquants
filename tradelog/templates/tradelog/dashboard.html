@@ -5,35 +5,33 @@
 {% block content %}
 <div class="dashboard-wrapper">
 
-    <!-- SECTION 1: OVERVIEW & PERFORMANCE -->
+    <!-- SECTION 1: OVERVIEW & PERFORMANCE (Default Active) -->
     <div id="overview-section" class="tab-content-area">
         {% include 'tradelog/include/overview_cards.html' %}
     </div>
 
-    <!-- SECTION 2: ALGOS & ML WORKSPACES -->
-
-<!-- 1. Technical Analysis & Quantitative Screener Workspace -->
-<div id="ml-technical-section" class="tab-content-area d-block">
-    <div class="mb-4">
-        {% include 'tradelog/include/stock_screener.html' %}
+    <!-- SECTION 2: ALGOS & MACHINE LEARNING -->
+    <div id="stock-screener-section" class="tab-content-area d-none">
+        <h2 class="fw-bold text-white mb-1">NSE Stock Screener</h2>
+        <p class="text-secondary small mb-4">Real-time Nairobi Securities Exchange Market Analytics</p>
+        <div class="aq-card p-4">
+            {% include "tradelog/include/stock_screener.html" %}
+        </div>
     </div>
-</div>
 
-<!-- 2. Sentiment Analysis NLP Workspace -->
-<div id="ml-sentiment-section" class="tab-content-area d-none">
-    <div class="glass-card p-4 rounded-4 border border-secondary bg-dark text-white shadow-lg">
-        <h5 class="fw-bold mb-2"><i class="bi bi-chat-square-quote text-info me-2"></i>Sentiment Analysis NLP Workspace</h5>
-        <p class="text-secondary small mb-0">Real-time market sentiment scoring, news impact analytics, and NLP signals.</p>
+    <div id="stocks-ml-section" class="tab-content-area d-none">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold text-white">Stocks ML Models</h5>
+            <p class="text-secondary small mb-0">Predictive Machine Learning Models & Signal Generation</p>
+        </div>
     </div>
-</div>
 
-<!-- 3. Fundamental Macro Workspace -->
-<div id="ml-fundamental-section" class="tab-content-area d-none">
-    <div class="glass-card p-4 rounded-4 border border-secondary bg-dark text-white shadow-lg">
-        <h5 class="fw-bold mb-2"><i class="bi bi-globe2 text-warning me-2"></i>Fundamental Macro Workspace</h5>
-        <p class="text-secondary small mb-0">Macroeconomic data trends, interest rate tracking, and fundamental valuation metrics.</p>
+    <div id="fundamental-analysis-section" class="tab-content-area d-none">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold text-white">Fundamental Analysis</h5>
+            <p class="text-secondary small mb-0">Financial Statements & Equity Valuation Metrics</p>
+        </div>
     </div>
-</div>
 
     <!-- SECTION 3: LEARNING CENTER -->
     <div id="learn-technical-section" class="tab-content-area d-none">
@@ -70,50 +68,43 @@
 
 {% block extra_js %}
 <script>
-    // Tab switching logic kept global for sidebar compatibility
+    // Tab switching logic for both sidebar links and workspace buttons
     function switchTab(event, sectionId) {
-    if (event) {
-        event.preventDefault();
-    }
-    
-    // Hide all tab sections
-    const sections = document.querySelectorAll('.tab-content-area');
-    sections.forEach(el => el.classList.add('d-none'));
-    
-    // Show target section
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.remove('d-none');
-    } else {
-        console.error(`Target section #${sectionId} not found in DOM.`);
-    }
-    
-    // Highlight active link if triggered from event
-    if (event && event.currentTarget) {
-        document.querySelectorAll('.nav-link-custom').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    }
-}
-</script>
-<script>
-function switchWorkspace(targetId, btnElement) {
-    // Hide all workspace sections
-    document.querySelectorAll('.tab-content-area').forEach(el => {
-        el.classList.add('d-none');
-        el.classList.remove('d-block');
-    });
-
-    // Show selected workspace section
-    const targetSection = document.getElementById(targetId);
-    if (targetSection) {
-        targetSection.classList.remove('d-none');
-        targetSection.classList.add('d-block');
+        if (event) {
+            event.preventDefault();
+        }
+        
+        // 1. Hide all sections using d-none
+        const sections = document.querySelectorAll('.tab-content-area');
+        sections.forEach(el => {
+            el.classList.add('d-none');
+            el.style.display = ''; // Clear inline styles if any exist
+        });
+        
+        // 2. Reveal the targeted section
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.remove('d-none');
+        } else {
+            console.error(`Target section #${sectionId} not found in DOM.`);
+        }
+        
+        // 3. Update sidebar link active highlighting
+        if (event && event.currentTarget) {
+            document.querySelectorAll('.nav-link-custom').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
     }
 
-    // Update active class on buttons
-    const parentContainer = btnElement.parentElement;
-    parentContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
-}
+    // Consolidated workspace switcher
+    function switchWorkspace(targetId, btnElement) {
+        switchTab(null, targetId);
+
+        // Update button active state in workspace button groups
+        if (btnElement && btnElement.parentElement) {
+            btnElement.parentElement.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+    }
 </script>
 {% endblock %}
