@@ -1,0 +1,61 @@
+<!-- TOP STATS METRICS -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3">
+            <span class="text-secondary small fw-semibold">Model Portfolio Return</span>
+            <h3 class="fw-bold my-2 text-success">+34.8%</h3>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3">
+            <span class="text-secondary small fw-semibold">Predictive Accuracy</span>
+            <h3 class="fw-bold my-2 text-warning">78.4%</h3>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3">
+            <span class="text-secondary small fw-semibold">Active Signals Streamed</span>
+            <h3 class="fw-bold my-2 text-white">1,420</h3>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3 d-flex flex-column justify-content-between">
+            <div>
+                <span class="text-secondary small fw-semibold">MT5 Engine Sync</span>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
+                    <span class="fw-bold text-success">Live Pipeline Ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN PERFORMANCE CHART & QUICK ACTIONS -->
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold text-white mb-3">Combined Model Alpha Trend</h5>
+            <div style="height: 250px;">
+                <canvas id="mainPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <h5 class="fw-bold text-white mb-2">Resources Quick Access</h5>
+                <p class="text-secondary small">Access journals, custom scripts, and learning materials.</p>
+            </div>
+            <!-- Inside templates/include/overview_cards.html -->
+<div class="d-flex flex-column gap-2">
+    <button class="btn btn-green w-100" onclick="switchTab(null, 'journal-section')">
+        Open Trading Journal <i class="bi bi-journal-text ms-1"></i>
+    </button>
+    <button class="btn btn-secondary w-100" onclick="switchTab(null, 'converter-section')">
+        Currency Converter 💱
+    </button>
+</div>
+        </div>
+    </div>
+</div>

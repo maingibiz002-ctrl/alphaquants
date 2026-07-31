@@ -1,0 +1,33 @@
+<div id="aiFloatingWidget" class="position-fixed bottom-0 end-0 m-4 d-flex flex-column align-items-end" style="z-index: 1050;">
+    <div id="aiChatCard" class="glass-card p-3 mb-3 d-none shadow-lg" style="width: 350px; height: 440px; display: flex; flex-direction: column;">
+        <div class="d-flex align-items-center justify-content-between border-bottom border-secondary pb-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-success text-dark fw-bold rounded-circle d-flex align-items-center justify-content-center user-avatar-badge" style="width: 32px; height: 32px;">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div>
+                    <span class="fw-bold text-white small d-block">Alpha AI Assistant</span>
+                    <span class="text-success extra-small d-block"><i class="bi bi-circle-fill fs-6 me-1" style="font-size: 8px !important;"></i>Online</span>
+                </div>
+            </div>
+            <button class="btn btn-sm text-secondary p-0 border-0" onclick="toggleAiChat()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div id="aiChatBody" class="flex-grow-1 overflow-y-auto style-scrollbar pe-1 d-flex flex-column gap-2 my-2" style="font-size: 0.85rem;">
+            <div class="p-2 rounded-3 bg-dark border border-secondary text-white max-w-xs align-self-start">
+                Hello <strong>{{ request.user.username }}</strong>! How can I assist your quantitative analysis or trade review today?
+            </div>
+        </div>
+
+        <form id="aiChatForm" class="mt-auto border-top border-secondary pt-2">
+            <div class="input-group">
+                <input type="text" id="aiChatInput" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Ask about EURUSD, ML models..." required>
+                <button type="submit" class="btn btn-green btn-sm"><i class="bi bi-send-fill"></i></button>
+            </div>
+        </form>
+    </div>
+
+    <button id="aiChatToggleBtn" class="btn btn-green rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 52px; height: 52px;" onclick="toggleAiChat()">
+        <i class="bi bi-chat-dots-fill fs-4"></i>
+    </button>
+</div>

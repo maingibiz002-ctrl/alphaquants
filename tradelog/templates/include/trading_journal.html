@@ -1,0 +1,280 @@
+<div class="row g-4 mb-4">
+    <!-- FORM COLUMN -->
+    <div class="col-lg-7">
+        <div class="glass-card p-4">
+
+            <!-- Screenshot Upload Dropzone -->
+            <div class="glass-card p-3 mb-4" style="border: 1px dashed #22c55e;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h6 class="mb-1 text-light fw-semibold">
+                            <i class="bi bi-magic me-2 text-success"></i>Auto-Fill via Screenshot
+                        </h6>
+                        <p class="text-secondary extra-small mb-0">Upload an MT4/MT5 or TradingView screenshot to extract trade details automatically.</p>
+                    </div>
+                    <div>
+                        <label for="tradeScreenshot" class="btn btn-green btn-sm px-3 py-2 cursor-pointer mb-0">
+                            <i class="bi bi-upload me-1"></i> Upload Image
+                        </label>
+                        <input type="file" id="tradeScreenshot" accept="image/*" class="d-none">
+                    </div>
+                </div>
+                
+                <div id="ocrStatusContainer" class="mt-2 d-none">
+                    <small id="ocrStatus" class="extra-small"></small>
+                </div>
+            </div>
+
+            <h4 class="fw-bold text-white mb-4"><i class="bi bi-journal-plus text-success me-2"></i>Log New Trade</h4>
+            
+            <form id="journalForm">
+                {% csrf_token %}
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Instrument</label>
+                        <select class="form-select bg-dark text-white border-secondary" id="journalInstrument" required>
+                            <option value="EURUSD">EUR/USD</option>
+                            <option value="GBPUSD">GBP/USD</option>
+                            <option value="XAUUSD">XAU/USD (Gold)</option>
+                            <option value="BTCUSD">BTC/USD</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small">Direction</label>
+                        <select class="form-select bg-dark text-white border-secondary" id="journalDirection" required>
+                            <option value="BUY">BUY (Long)</option>
+                            <option value="SELL">SELL (Short)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-secondary small">Entry Price</label>
+                        <input type="number" step="0.00001" class="form-control bg-dark text-white border-secondary" id="entryPrice" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-secondary small">Exit Price</label>
+                        <input type="number" step="0.00001" class="form-control bg-dark text-white border-secondary" id="exitPrice" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-secondary small">Stop Loss</label>
+                        <input type="number" step="0.00001" class="form-control bg-dark text-white border-secondary" id="stopLoss">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-secondary small">Take Profit</label>
+                        <input type="number" step="0.00001" class="form-control bg-dark text-white border-secondary" id="takeProfit">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Lots</label>
+                        <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="lotSize" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Net PnL ($)</label>
+                        <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="pnlValue" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Setup Tag</label>
+                        <select class="form-select bg-dark text-white border-secondary" id="strategyTag">
+                            <option value="Order Block">CRT</option>
+                            <option value="Liquidity Sweep">Strategy 2</option>
+                            <option value="Breakout">Strategy 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-secondary small">Notes</label>
+                    <textarea class="form-control bg-dark text-white border-secondary" id="tradeNotes" rows="2"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-green w-100 fw-bold">Save Trade Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI AUDIT COLUMN -->
+    <div class="col-lg-5">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <h5 class="fw-bold text-white mb-3"><i class="bi bi-cpu text-warning me-2"></i>AI Feedback</h5>
+                <div class="p-3 rounded bg-dark border border-secondary">
+                    <p class="text-secondary small mb-2" id="aiFeedbackMessage">Awaiting trade input...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary extra-small">Risk-Reward:</span>
+                        <span class="badge bg-success" id="calcRRDisplay">1 : --</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PERFORMANCE ANALYTICS & HISTORY -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-3">
+            <span class="text-secondary extra-small">Cumulative Net P&L</span>
+            <h4 class="fw-bold my-1 text-success" id="analyticsNetPnL">+$450.00</h4>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-3">
+            <span class="text-secondary extra-small">Win / Loss Ratio</span>
+            <h4 class="fw-bold my-1 text-white">2 Win / 1 Loss</h4>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-3">
+            <span class="text-secondary extra-small">Profit Factor</span>
+            <h4 class="fw-bold my-1 text-warning">2.25</h4>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h6 class="fw-bold text-white mb-3">Cumulative Growth Curve</h6>
+            <div style="height: 200px;">
+                <canvas id="journalPnLChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TRADE HISTORY TABLE -->
+<div class="glass-card p-4">
+    <h5 class="fw-bold text-white mb-3"><i class="bi bi-list-task text-primary me-2"></i>Logged Trades History</h5>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-secondary extra-small text-uppercase">
+                    <th>Date</th>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>Lots</th>
+                    <th>Entry</th>
+                    <th>Exit</th>
+                    <th>Tag</th>
+                    <th>PnL ($)</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tradeLogTableBody" class="small">
+                <tr>
+                    <td class="text-secondary">2026-07-28 10:15</td>
+                    <td class="fw-bold text-white">EURUSD</td>
+                    <td><span class="badge bg-success bg-opacity-20 text-success">BUY</span></td>
+                    <td>0.50</td>
+                    <td>1.08500</td>
+                    <td>1.09100</td>
+                    <td><span class="badge bg-dark border border-secondary text-info">Order Block</span></td>
+                    <td class="fw-bold text-success">+$300.00</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="viewTradeDetails('EURUSD', 'BUY', '1.08500', '1.09100', '0.50', '+$300.00', 'Order Block', 'Disciplined entry.')">Details</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let journalPnlHistory = [0, 300, 110, 450];
+    let pnlChartInstance = null;
+
+    function viewTradeDetails(symbol, direction, entry, exit, lots, pnl, strategy, notes) {
+        document.getElementById('modalTradeContent').innerHTML = `
+            <div class="d-flex justify-content-between mb-2">
+                <strong>${symbol} (${direction})</strong>
+                <span class="${pnl.includes('+') ? 'text-success' : 'text-danger'}">${pnl}</span>
+            </div>
+            <p class="extra-small text-secondary mb-1">Entry: ${entry} | Exit: ${exit} | Lots: ${lots}</p>
+            <p class="extra-small text-white bg-dark p-2 rounded border border-secondary">${notes}</p>
+        `;
+        new bootstrap.Modal(document.getElementById('tradeDetailsModal')).show();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const pnlCtx = document.getElementById('journalPnLChart');
+        if (pnlCtx) {
+            pnlChartInstance = new Chart(pnlCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', 'Trade 1', 'Trade 2', 'Trade 3'],
+                    datasets: [{
+                        data: journalPnlHistory,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+    });
+
+    document.getElementById('tradeScreenshot').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const statusContainer = document.getElementById('ocrStatusContainer');
+        const statusText = document.getElementById('ocrStatus');
+        
+        statusContainer.classList.remove('d-none');
+        statusText.className = "extra-small text-info";
+        statusText.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i> Processing screenshot with OCR...';
+
+        const formData = new FormData();
+        formData.append('screenshot', file);
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        try {
+            const response = await fetch('/extract-trade/', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const data = result.data;
+                const fieldMap = {
+                    'journalInstrument': data.instrument,
+                    'journalDirection': data.direction,
+                    'entryPrice': data.entry_price,
+                    'exitPrice': data.exit_price,
+                    'stopLoss': data.stop_loss,
+                    'takeProfit': data.take_profit,
+                    'lotSize': data.lots,
+                    'pnlValue': data.net_pnl
+                };
+
+                for (const [elementId, val] of Object.entries(fieldMap)) {
+                    const element = document.getElementById(elementId);
+                    if (element && val !== null && val !== undefined) {
+                        element.value = val;
+                        element.style.borderColor = '#22c55e';
+                        element.style.boxShadow = '0 0 8px rgba(34, 197, 94, 0.4)';
+                        setTimeout(() => { 
+                            element.style.borderColor = ''; 
+                            element.style.boxShadow = '';
+                        }, 2500);
+                    }
+                }
+
+                statusText.className = "extra-small text-success";
+                statusText.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Fields populated successfully from screenshot!';
+            } else {
+                statusText.className = "extra-small text-danger";
+                statusText.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Error: ' + (result.message || 'Could not parse image.');
+            }
+        } catch (err) {
+            statusText.className = "extra-small text-danger";
+            statusText.innerHTML = '<i class="bi bi-exclamation-octagon-fill me-1"></i> Server error processing image.';
+        }
+    });
+</script>

@@ -1,0 +1,38 @@
+{% extends 'tradelog/base.html' %}
+
+{% block title %}Login | Alpha Quant Trades{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center my-5">
+    <div class="card bg-black border-secondary p-4 rounded-4 shadow-lg" style="width: 100%; max-width: 420px;">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-white">Alpha Terminal</h3>
+            <p class="text-secondary small">Sign in to access your quantitative execution desk</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-danger py-2 small" role="alert">
+                Invalid username or password. Please try again.
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label for="id_username" class="form-label text-secondary small fw-bold">Username</label>
+                <input type="text" name="username" class="form-control bg-dark text-white border-secondary" id="id_username" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="id_password" class="form-label text-secondary small fw-bold">Password</label>
+                <input type="password" name="password" class="form-control bg-dark text-white border-secondary" id="id_password" required>
+            </div>
+
+            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
+                Log In
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

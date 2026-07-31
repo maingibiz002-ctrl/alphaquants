@@ -1,0 +1,110 @@
+<div class="glass-card p-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h4 class="text-white mb-0">
+            <i class="bi bi-currency-exchange me-2 text-success"></i>Currency Converter
+        </h4>
+        <span class="badge bg-dark border border-secondary text-light" id="rate-status">Real-Time Rates</span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label text-secondary small">Amount</label>
+            <input type="number" id="convert-amount" class="form-control bg-dark text-white border-secondary" value="120" min="0" step="any">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label text-secondary small">From</label>
+            <select id="currency-from" class="form-select bg-dark text-white border-secondary">
+                <option value="USD" selected>USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="KES">KES - Kenyan Shilling</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label text-secondary small">To</label>
+            <select id="currency-to" class="form-select bg-dark text-white border-secondary">
+                <option value="KES" selected>KES - Kenyan Shilling</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mt-4 p-3 bg-dark rounded border border-secondary d-flex align-items-center justify-content-between">
+        <span class="text-secondary">Converted Value:</span>
+        <h3 class="text-success mb-0 fw-bold" id="converted-result">-- KES</h3>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Fallback static conversion rates (against USD)
+    const fallbackRates = {
+        USD: 1.0,
+        KES: 129.50,
+        EUR: 0.92,
+        GBP: 0.78
+    };
+
+    let cachedRates = null;
+
+    async function fetchRates() {
+        try {
+            const response = await fetch('https://open.er-api.com/v6/latest/USD');
+            if (!response.ok) throw new Error('Network response failed');
+            const data = await response.json();
+            cachedRates = data.rates;
+            document.getElementById('rate-status').innerText = 'Live Rates Active';
+        } catch (err) {
+            console.warn('API fetch failed, falling back to static rates:', err);
+            cachedRates = fallbackRates;
+            document.getElementById('rate-status').innerText = 'Offline Rates';
+        }
+    }
+
+    async function calculateConversion() {
+        const amountInput = document.getElementById('convert-amount');
+        const fromSelect = document.getElementById('currency-from');
+        const toSelect = document.getElementById('currency-to');
+        const resultDisplay = document.getElementById('converted-result');
+
+        if (!amountInput || !fromSelect || !toSelect || !resultDisplay) return;
+
+        const amount = parseFloat(amountInput.value) || 0;
+        const from = fromSelect.value;
+        const to = toSelect.value;
+
+        if (!cachedRates) {
+            await fetchRates();
+        }
+
+        // Convert via USD baseline
+        const fromRateInUSD = cachedRates[from] || fallbackRates[from] || 1;
+        const toRateInUSD = cachedRates[to] || fallbackRates[to] || 1;
+
+        const convertedValue = (amount / fromRateInUSD) * toRateInUSD;
+
+        // Format to 2 decimal places with comma separators
+        resultDisplay.innerText = `${convertedValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${to}`;
+    }
+
+    // Attach event listeners for real-time recalculation
+    document.addEventListener('DOMContentLoaded', () => {
+        const amountInput = document.getElementById('convert-amount');
+        const fromSelect = document.getElementById('currency-from');
+        const toSelect = document.getElementById('currency-to');
+
+        if (amountInput) amountInput.addEventListener('input', calculateConversion);
+        if (fromSelect) fromSelect.addEventListener('change', calculateConversion);
+        if (toSelect) toSelect.addEventListener('change', calculateConversion);
+
+        calculateConversion();
+    });
+
+    // Also trigger recalculation if the tab becomes visible via switchTab
+    window.addEventListener('click', () => {
+        setTimeout(calculateConversion, 100);
+    });
+})();
+</script>

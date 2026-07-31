@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Alpha Quant | Quantitative AI & Analytics Terminal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+
+    <!-- SECTION 1: OVERVIEW & PERFORMANCE -->
+    <div id="overview-section" class="tab-content-area">
+        {% include 'include/overview_cards.html' %}
+    </div>
+
+    <!-- SECTION 2: ALGOS & ML WORKSPACES -->
+    <div id="ml-technical-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="text-white fw-bold">Technical Analysis ML Workspace</h5></div>
+    </div>
+    <div id="ml-sentiment-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="text-white fw-bold">Sentiment Analysis NLP Workspace</h5></div>
+    </div>
+    <div id="ml-fundamental-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="text-white fw-bold">Fundamental Macro Workspace</h5></div>
+    </div>
+
+    <!-- SECTION 3: LEARNING CENTER -->
+    <div id="learn-technical-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="fw-bold text-white">Learning: Technical Analysis</h5></div>
+    </div>
+    <div id="learn-fundamental-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="fw-bold text-white">Learning: Fundamental Analysis</h5></div>
+    </div>
+    <div id="learn-sentiment-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="fw-bold text-white">Learning: Sentiment Analysis</h5></div>
+    </div>
+    <div id="learn-psychology-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="fw-bold text-white">Learning: Trading Psychology</h5></div>
+    </div>
+
+    <!-- SECTION 4: TRADING JOURNAL & ANALYTICS -->
+    <div id="journal-section" class="tab-content-area d-none">
+        {% include 'include/trading_journal.html' %}
+    </div>
+
+    <!-- SECTION 5: EXTRA TOOLS -->
+    <div id="indicators-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="text-white">Indicators</h5></div>
+    </div>
+    <div id="blogs-section" class="tab-content-area d-none">
+        <div class="glass-card p-4"><h5 class="text-white">Blogs</h5></div>
+    </div>
+    <div id="converter-section" class="tab-content-area d-none">
+        {% include 'include/currency_converter.html' %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tab switching logic kept global for sidebar compatibility
+    function switchTab(event, sectionId) {
+    if (event) {
+        event.preventDefault();
+    }
+    
+    // Hide all tab sections
+    const sections = document.querySelectorAll('.tab-content-area');
+    sections.forEach(el => el.classList.add('d-none'));
+    
+    // Show target section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('d-none');
+    } else {
+        console.error(`Target section #${sectionId} not found in DOM.`);
+    }
+    
+    // Highlight active link if triggered from event
+    if (event && event.currentTarget) {
+        document.querySelectorAll('.nav-link-custom').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+}
+</script>
+{% endblock %}

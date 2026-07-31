@@ -1,0 +1,127 @@
+/* Core Dark Theme Base */
+body {
+    background-color: #0b0e14 !important;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+}
+
+/* Sidebar Layout */
+.app-sidebar {
+    width: 240px;
+    background: #111622;
+    border-right: 1px solid #1e2638;
+    min-height: 100vh;
+}
+
+.nav-link-custom {
+    color: #8a99ad;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.nav-link-custom:hover, 
+.nav-link-custom.active {
+    background: #1a2336;
+    color: #38ef7d;
+}
+
+/* Dark Glassmorphic Components */
+.glass-card {
+    background: #131a29;
+    border: 1px solid #1e293b;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.search-input {
+    background: #131a29;
+    border: 1px solid #1e293b;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.search-input:focus {
+    background: #182235;
+    color: #ffffff;
+    border-color: #38ef7d;
+    box-shadow: none;
+}
+
+/* Accent Buttons & Boxes */
+.btn-green {
+    background: #22c55e;
+    color: #000;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+}
+
+.btn-green:hover {
+    background: #16a34a;
+    color: #000;
+}
+
+.promo-banner {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* Chart Canvas Sizing */
+.sparkline-container {
+    height: 45px;
+    width: 100%;
+}
+
+.main-chart-container {
+    height: 280px;
+    width: 100%;
+}
+
+.user-avatar-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+}
+/* Search Input Container & Base Style */
+.search-input {
+    background: #131a29;
+    border: 1px solid #1e293b;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 0.55rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+/* Explicit high-contrast placeholder styling */
+.search-input::placeholder {
+    color: #94a3b8 !important; /* Brighter slate-gray for clear readability */
+    opacity: 1;
+}
+
+/* Focus outline & subtle glow */
+.search-input:focus {
+    background: #182235;
+    color: #ffffff;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+    outline: none;
+}
+.extra-small {
+    font-size: 0.75rem;
+}
+
+/* Smooth transition for floating widget */
+#aiChatCard {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

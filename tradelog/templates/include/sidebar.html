@@ -1,0 +1,63 @@
+<aside class="app-sidebar p-3 d-none d-md-flex flex-column" style="width: 260px; flex-shrink: 0;">
+    <div class="d-flex align-items-center gap-2 mb-4 px-2">
+        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold user-avatar-badge">
+            <i class="bi bi-activity"></i>
+        </div>
+        <span class="fw-bold fs-5 text-white">AlphaQuant</span>
+    </div>
+
+    <nav class="d-flex flex-column gap-1 overflow-y-auto style-scrollbar pe-1" style="max-height: calc(100vh - 120px);">
+        <!-- DASHBOARD -->
+        <a href="#overview-section" class="nav-link-custom active" onclick="switchTab(event, 'overview-section')">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+
+        <!-- ALGOS & MACHINE LEARNING -->
+        <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Algos & Machine Learning</div>
+        <a href="#ml-technical-section" class="nav-link-custom" onclick="switchTab(event, 'ml-technical-section')">
+            <i class="bi bi-graph-up"></i> Technical Analysis
+        </a>
+        <a href="#ml-sentiment-section" class="nav-link-custom" onclick="switchTab(event, 'ml-sentiment-section')">
+            <i class="bi bi-chat-square-quote"></i> Sentiment Analysis
+        </a>
+        <a href="#ml-fundamental-section" class="nav-link-custom" onclick="switchTab(event, 'ml-fundamental-section')">
+            <i class="bi bi-briefcase"></i> Fundamental Analysis
+        </a>
+
+        <!-- LEARNING CENTER -->
+        <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Learning Center</div>
+        <a href="#learn-technical-section" class="nav-link-custom" onclick="switchTab(event, 'learn-technical-section')">
+            <i class="bi bi-book"></i> Technical Analysis
+        </a>
+        <a href="#learn-fundamental-section" class="nav-link-custom" onclick="switchTab(event, 'learn-fundamental-section')">
+            <i class="bi bi-journal-text"></i> Fundamental Analysis
+        </a>
+        <a href="#learn-sentiment-section" class="nav-link-custom" onclick="switchTab(event, 'learn-sentiment-section')">
+            <i class="bi bi-newspaper"></i> Sentiment Analysis
+        </a>
+        <a href="#learn-psychology-section" class="nav-link-custom" onclick="switchTab(event, 'learn-psychology-section')">
+            <i class="bi bi-brain"></i> Trading Psychology
+        </a>
+
+        <!-- RESOURCES HUB -->
+        <div class="text-secondary extra-small fw-bold text-uppercase mt-3 mb-1 px-2">Resources</div>
+        <a href="#journal-section" class="nav-link-custom" onclick="switchTab(event, 'journal-section')">
+            <i class="bi bi-journal-bookmark-fill"></i> Trading Journal
+        </a>
+        <a href="#indicators-section" class="nav-link-custom" onclick="switchTab(event, 'indicators-section')">
+            <i class="bi bi-code-slash"></i> Indicators
+        </a>
+        <a href="#blogs-section" class="nav-link-custom" onclick="switchTab(event, 'blogs-section')">
+            <i class="bi bi-quote"></i> Blogs & Insights
+        <a href="#" class="nav-link-custom" onclick="switchTab(event, 'converter-section')">
+    <i class="bi bi-currency-exchange me-2"></i> Currency Converter
+</a>
+    </a>
+    </nav>
+
+    <div class="mt-auto pt-3">
+        <a href="/admin/logout/" class="nav-link-custom text-secondary border-0 bg-transparent">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+    </div>
+</aside>
