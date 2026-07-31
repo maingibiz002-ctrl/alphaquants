@@ -1,78 +1,170 @@
-<!-- NSE Stock Screener Component -->
-<div class="card bg-dark border-secondary p-4 rounded-4 shadow-lg mb-4" id="stock-screener-section">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h3 class="fw-bold text-white m-0">NSE Stock Screener</h3>
-            <p class="text-secondary small mb-0 mt-1">Live market filtering for Nairobi Securities Exchange equities (KSh)</p>
+<!-- FILTER CONTROLS BAR -->
+<div class="row g-3 mb-4">
+    <!-- Search Input -->
+    <div class="col-12 col-md-3">
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Search Ticker / Name</label>
+        <div class="input-group">
+            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
+            <input type="text" id="screenerSearch" class="form-control bg-dark text-white border-secondary" placeholder="e.g. SCOM, EQTY...">
         </div>
-        <span class="badge bg-black border border-warning text-warning px-3 py-2">
-            Matched: {{ total_count|default:0 }}
-        </span>
     </div>
 
-    <!-- Filter Form -->
-    <div class="card bg-black border-secondary p-3 mb-4 rounded-3 shadow">
-        <form method="get" action="{% url 'dashboard' %}#stock-screener-section" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label text-secondary small fw-bold">Min Price (KSh)</label>
-                <input type="number" name="min_price" value="{{ min_price }}" placeholder="0.00" step="any" class="form-control bg-dark text-white border-secondary">
-            </div>
-            
-            <div class="col-md-3">
-                <label class="form-label text-secondary small fw-bold">Max Price (KSh)</label>
-                <input type="number" name="max_price" value="{{ max_price }}" placeholder="1000.00" step="any" class="form-control bg-dark text-white border-secondary">
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label text-secondary small fw-bold">Performance</label>
-                <select name="performance" class="form-select bg-dark text-white border-secondary">
-                    <option value="ALL" {% if performance_filter == 'ALL' %}selected{% endif %}>All Securities</option>
-                    <option value="GAINERS" {% if performance_filter == 'GAINERS' %}selected{% endif %}>Top Gainers (+)</option>
-                    <option value="LOSERS" {% if performance_filter == 'LOSERS' %}selected{% endif %}>Top Losers (-)</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-warning w-100 fw-bold">
-                    Filter
-                </button>
-            </div>
-        </form>
+    <!-- Sector Filter -->
+    <div class="col-12 col-md-3">
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Sector</label>
+        <select id="sectorFilter" class="form-select bg-dark text-white border-secondary">
+            <option value="ALL" selected>All Sectors</option>
+            <option value="Banking">Banking</option>
+            <option value="Telecommunication">Telecommunication & Tech</option>
+            <option value="Energy">Energy & Petroleum</option>
+            <option value="Manufacturing">Manufacturing & Allied</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Commercial">Commercial & Services</option>
+        </select>
     </div>
 
-    <!-- Results Table -->
-    <div class="card bg-black border-secondary rounded-3 shadow">
-        <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle mb-0">
-                <thead class="table-borderless border-bottom border-secondary text-secondary extra-small text-uppercase">
-                    <tr>
-                        <th>Symbol</th>
-                        <th>Security Name</th>
-                        <th>Price (KSh)</th>
-                        <th>24h Change</th>
-                        <th>Volume</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in stocks %}
-                    <tr>
-                        <td class="fw-bold text-warning">{{ item.ticker }}</td>
-                        <td class="text-white">{{ item.name }}</td>
-                        <td class="fw-bold">KSh {{ item.price|floatformat:2 }}</td>
-                        <td class="{% if item.change > 0 %}text-success{% elif item.change < 0 %}text-danger{% else %}text-secondary{% endif %} fw-bold">
-                            {% if item.change > 0 %}+{% endif %}{{ item.change|floatformat:2 }}%
-                        </td>
-                        <td class="text-secondary small">{{ item.volume }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4 text-secondary">
-                            No securities found matching your screening criteria.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <!-- P/E Ratio Range -->
+    <div class="col-12 col-md-2">
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Max P/E Ratio</label>
+        <input type="number" id="peFilter" class="form-control bg-dark text-white border-secondary" placeholder="e.g. 15" step="0.1">
+    </div>
+
+    <!-- Min Dividend Yield -->
+    <div class="col-12 col-md-2">
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Min Div Yield (%)</label>
+        <input type="number" id="divFilter" class="form-control bg-dark text-white border-secondary" placeholder="e.g. 5.0" step="0.1">
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+        <button type="button" class="btn btn-primary w-100" onclick="applyScreenerFilters()">
+            <i class="bi bi-funnel me-1"></i> Filter
+        </button>
+        <button type="button" class="btn btn-outline-secondary" onclick="resetScreenerFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
     </div>
 </div>
+
+<!-- STOCK LIST TABLE -->
+<div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0" id="screenerTable">
+        <thead>
+            <tr class="text-secondary extra-small text-uppercase">
+                <th>Ticker / Name</th>
+                <th>Sector</th>
+                <th>Price (KES)</th>
+                <th>24h Change</th>
+                <th>P/E Ratio</th>
+                <th>Div Yield</th>
+                <th>Volume</th>
+                <th>Market Cap</th>
+                <th>Signal</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr class="stock-row" data-sector="{{ stock.sector }}" data-pe="{{ stock.pe_ratio }}" data-div="{{ stock.div_yield }}">
+                <td>
+                    <div class="fw-bold text-white">{{ stock.ticker }}</div>
+                    <div class="extra-small text-secondary">{{ stock.company_name }}</div>
+                </td>
+                <td><span class="badge bg-secondary-subtle text-secondary">{{ stock.sector }}</span></td>
+                <td class="fw-bold text-white">{{ stock.price|floatformat:2 }}</td>
+                <td class="{% if stock.change_pct >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
+                    {% if stock.change_pct >= 0 %}+{% endif %}{{ stock.change_pct|floatformat:2 }}%
+                </td>
+                <td>{{ stock.pe_ratio|default:"N/A" }}</td>
+                <td>{{ stock.div_yield }}%</td>
+                <td>{{ stock.volume }}</td>
+                <td>{{ stock.market_cap }}</td>
+                <td>
+                    {% if stock.signal == 'BULLISH' %}
+                        <span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-up-right me-1"></i>BUY</span>
+                    {% elif stock.signal == 'BEARISH' %}
+                        <span class="badge bg-danger-subtle text-danger"><i class="bi bi-arrow-down-right me-1"></i>SELL</span>
+                    {% else %}
+                        <span class="badge bg-warning-subtle text-warning"><i class="bi bi-dash-lg me-1"></i>HOLD</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewStockDetails('{{ stock.ticker }}')">
+                        <i class="bi bi-graph-up me-1"></i> Analyze
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <!-- Placeholder rows if backend context isn't passed yet -->
+            <tr class="stock-row" data-sector="Telecommunication" data-pe="12.4" data-div="6.8">
+                <td>
+                    <div class="fw-bold text-white">SCOM</div>
+                    <div class="extra-small text-secondary">Safaricom PLC</div>
+                </td>
+                <td><span class="badge bg-secondary-subtle text-light">Telecommunication</span></td>
+                <td class="fw-bold text-white">18.20</td>
+                <td class="text-success fw-bold">+2.25%</td>
+                <td>12.4</td>
+                <td>6.8%</td>
+                <td>4.2M</td>
+                <td>729.1B</td>
+                <td><span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-up-right me-1"></i>BUY</span></td>
+                <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-graph-up me-1"></i> Analyze</button></td>
+            </tr>
+            <tr class="stock-row" data-sector="Banking" data-pe="4.1" data-div="8.5">
+                <td>
+                    <div class="fw-bold text-white">EQTY</div>
+                    <div class="extra-small text-secondary">Equity Group Holdings</div>
+                </td>
+                <td><span class="badge bg-secondary-subtle text-light">Banking</span></td>
+                <td class="fw-bold text-white">47.50</td>
+                <td class="text-danger fw-bold">-0.84%</td>
+                <td>4.1</td>
+                <td>8.5%</td>
+                <td>1.8M</td>
+                <td>179.2B</td>
+                <td><span class="badge bg-warning-subtle text-warning"><i class="bi bi-dash-lg me-1"></i>HOLD</span></td>
+                <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-graph-up me-1"></i> Analyze</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- CLIENT-SIDE FILTERING SCRIPT -->
+<script>
+    function applyScreenerFilters() {
+        const search = document.getElementById('screenerSearch').value.toLowerCase();
+        const sector = document.getElementById('sectorFilter').value;
+        const maxPe = parseFloat(document.getElementById('peFilter').value) || Infinity;
+        const minDiv = parseFloat(document.getElementById('divFilter').value) || 0;
+
+        const rows = document.querySelectorAll('#screenerTable .stock-row');
+
+        rows.forEach(row => {
+            const rowText = row.innerText.toLowerCase();
+            const rowSector = row.getAttribute('data-sector');
+            const rowPe = parseFloat(row.getAttribute('data-pe')) || Infinity;
+            const rowDiv = parseFloat(row.getAttribute('data-div')) || 0;
+
+            const matchesSearch = rowText.includes(search);
+            const matchesSector = (sector === 'ALL' || rowSector === sector);
+            const matchesPe = rowPe <= maxPe;
+            const matchesDiv = rowDiv >= minDiv;
+
+            if (matchesSearch && matchesSector && matchesPe && matchesDiv) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function resetScreenerFilters() {
+        document.getElementById('screenerSearch').value = '';
+        document.getElementById('sectorFilter').value = 'ALL';
+        document.getElementById('peFilter').value = '';
+        document.getElementById('divFilter').value = '';
+        applyScreenerFilters();
+    }
+</script>
