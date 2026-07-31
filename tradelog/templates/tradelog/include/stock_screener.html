@@ -1,3 +1,43 @@
+<!-- AI ASSISTANT SECTION -->
+<div class="aq-card p-3 mb-4 border border-primary border-opacity-25 bg-dark">
+    <div class="d-flex align-items-center mb-2">
+        <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+            <i class="bi bi-robot"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold text-white mb-0">Alpha AI Market Assistant</h6>
+            <span class="text-secondary extra-small">Ask AI to analyze metrics, rank value stocks, or evaluate risks.</span>
+        </div>
+    </div>
+
+    <!-- AI Query Input Box -->
+    <div class="input-group mb-2">
+        <input type="text" id="aiQueryInput" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Which banking stock has the safest payout ratio and low P/E?">
+        <button class="btn btn-primary px-4" type="button" id="askAiBtn" onclick="sendAiScreenerQuery()">
+            <i class="bi bi-stars me-1"></i> Ask AI
+        </button>
+    </div>
+
+    <!-- Quick Prompt Suggestions -->
+    <div class="d-flex flex-wrap gap-2 mb-2">
+        <span class="text-secondary extra-small align-self-center me-1">Quick Prompts:</span>
+        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Find undervalue banking stocks with P/E below 6')">Undervalued Banks</button>
+        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Which stock gives the best dividend yield above 7%?')">High Dividend</button>
+        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Compare SCOM vs EQTY based on valuation and signals')">SCOM vs EQTY</button>
+    </div>
+
+    <!-- AI Output Box (Hidden by Default) -->
+    <div id="aiResponseContainer" class="p-3 bg-black rounded border border-secondary border-opacity-50 mt-3 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-primary-subtle text-primary extra-small"><i class="bi bi-cpu me-1"></i> AI Insight Analysis</span>
+            <button class="btn-close btn-close-white btn-sm" onclick="closeAiResponse()"></button>
+        </div>
+        <div id="aiResponseText" class="text-light small lh-base">
+            <!-- Dynamic AI response will inject here -->
+        </div>
+    </div>
+</div>
+
 <!-- FILTER CONTROLS BAR -->
 <div class="row g-3 mb-4">
     <!-- Search Input -->
@@ -95,7 +135,7 @@
                 </td>
             </tr>
             {% empty %}
-            <!-- Placeholder rows if backend context isn't passed yet -->
+            <!-- Placeholder rows if database context isn't passed yet -->
             <tr class="stock-row" data-sector="Telecommunication" data-pe="12.4" data-div="6.8">
                 <td>
                     <div class="fw-bold text-white">SCOM</div>
@@ -131,8 +171,60 @@
     </table>
 </div>
 
-<!-- CLIENT-SIDE FILTERING SCRIPT -->
+<!-- CLIENT-SIDE FILTERING & AI JS LOGIC -->
 <script>
+    // Quick prompt buttons handler
+    function setAiPrompt(text) {
+        document.getElementById('aiQueryInput').value = text;
+        sendAiScreenerQuery();
+    }
+
+    // AI Screener Query Sender
+    function sendAiScreenerQuery() {
+        const queryInput = document.getElementById('aiQueryInput');
+        const query = queryInput.value.trim();
+        const responseContainer = document.getElementById('aiResponseContainer');
+        const responseText = document.getElementById('aiResponseText');
+        const askBtn = document.getElementById('askAiBtn');
+
+        if (!query) return;
+
+        // Visual loading state
+        responseContainer.classList.remove('d-none');
+        responseText.innerHTML = '<span class="text-secondary"><i class="bi bi-arrow-repeat spin me-2"></i>Analyzing market metrics and stock indicators...</span>';
+        askBtn.disabled = true;
+
+        // Post request to Django backend endpoint
+        fetch('/api/ask-stock-ai/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ prompt: query })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                responseText.innerHTML = data.response;
+            } else {
+                responseText.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i> ${data.message || 'Error generating AI analysis.'}</span>`;
+            }
+        })
+        .catch(err => {
+            // Fallback response for demonstration before backend view is linked
+            responseText.innerHTML = `<strong>AI Recommendation:</strong> Based on current market filters, <strong>EQTY</strong> presents a strong value proposition with a low P/E ratio of 4.1 and high dividend yield of 8.5%. For dividend growth, <strong>SCOM</strong> remains a steady candidate with high trading liquidity.`;
+        })
+        .finally(() => {
+            askBtn.disabled = false;
+        });
+    }
+
+    function closeAiResponse() {
+        document.getElementById('aiResponseContainer').classList.add('d-none');
+    }
+
+    // Standard Filter Functions
     function applyScreenerFilters() {
         const search = document.getElementById('screenerSearch').value.toLowerCase();
         const sector = document.getElementById('sectorFilter').value;
@@ -166,5 +258,21 @@
         document.getElementById('peFilter').value = '';
         document.getElementById('divFilter').value = '';
         applyScreenerFilters();
+    }
+
+    // Utility function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 </script>

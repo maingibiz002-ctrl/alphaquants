@@ -56,3 +56,39 @@ class TradeChartImage(models.Model):
     journal_entry = models.ForeignKey(TradeJournal, on_delete=models.CASCADE, related_name='chart_images')
     image = models.ImageField(upload_to='trade_charts/%Y/%m/%d/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+from django.db import models
+
+class Stock(models.Model):
+    SECTOR_CHOICES = [
+        ('Banking', 'Banking'),
+        ('Telecommunication', 'Telecommunication & Tech'),
+        ('Energy', 'Energy & Petroleum'),
+        ('Manufacturing', 'Manufacturing & Allied'),
+        ('Insurance', 'Insurance'),
+        ('Commercial', 'Commercial & Services'),
+    ]
+
+    SIGNAL_CHOICES = [
+        ('BULLISH', 'BUY'),
+        ('BEARISH', 'SELL'),
+        ('NEUTRAL', 'HOLD'),
+    ]
+
+    ticker = models.CharField(max_length=10, unique=True)
+    company_name = models.CharField(max_length=100)
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICES)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    change_pct = models.FloatField(help_text="24-hour percentage change")
+    pe_ratio = models.FloatField(null=True, blank=True)
+    div_yield = models.FloatField(default=0.0, help_text="Dividend yield percentage")
+    volume = models.CharField(max_length=20, help_text="e.g. 4.2M")
+    market_cap = models.CharField(max_length=20, help_text="e.g. 729.1B")
+    signal = models.CharField(max_length=10, choices=SIGNAL_CHOICES, default='NEUTRAL')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['ticker']
+
+    def __str__(self):
+        return f"{self.ticker} - {self.company_name}"

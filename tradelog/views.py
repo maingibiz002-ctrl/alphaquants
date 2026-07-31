@@ -8,6 +8,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.shortcuts import render
+from .models import Stock
 
 from .models import UserProfile, TradeJournal, TradeChartImage
 
@@ -154,3 +156,28 @@ def nse_screener_view(request):
         'total_count': len(filtered_stocks)
     }
     return render(request, 'tradelog/stock_screener.html', context)
+
+
+
+def dashboard_view(request):
+    # Retrieve all stocks from the database
+    stocks = Stock.objects.all()
+
+    # Optional server-side filtering via GET parameters (e.g. /dashboard/?sector=Banking)
+    sector_filter = request.GET.get('sector')
+    if sector_filter and sector_filter != 'ALL':
+        stocks = stocks.filter(sector=sector_filter)
+
+    max_pe = request.GET.get('pe')
+    if max_pe:
+        stocks = stocks.filter(pe_ratio__lte=float(max_pe))
+
+    min_div = request.GET.get('div')
+    if min_div:
+        stocks = stocks.filter(div_yield__gte=float(min_div))
+
+    context = {
+        'stocks': stocks,
+    }
+
+    return render(request, 'tradelog/dashboard.html', context)
