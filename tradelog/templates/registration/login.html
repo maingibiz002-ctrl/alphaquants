@@ -29,10 +29,18 @@
                 <input type="password" name="password" class="form-control bg-dark text-white border-secondary" id="id_password" required>
             </div>
 
-            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
+            <button type="submit" class="btn btn-warning w-100 fw-bold py-2 mb-3">
                 Log In
             </button>
         </form>
+
+        <!-- Sign Up Prompt -->
+        <div class="text-center pt-2 border-top border-secondary-subtle">
+            <p class="text-secondary small mb-0">
+                Don't have an account? 
+                <a href="{% url 'signup' %}" class="text-warning text-decoration-none fw-bold ms-1">Sign Up</a>
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}
