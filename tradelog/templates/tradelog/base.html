@@ -22,24 +22,24 @@
 
     <div class="d-flex">
         <!-- SIDEBAR PARTIAL -->
-        {% include 'include/sidebar.html' %}
+        {% include "tradelog/include/sidebar.html" %}
 
         <!-- MAIN WRAPPER -->
         <main class="flex-grow-1 p-4" style="max-width: 100%; overflow-x: hidden;">
             <!-- HEADER PARTIAL -->
-            {% include 'include/header.html' %}
+            {% include 'tradelog/include/header.html' %}
 
             <!-- DYNAMIC CONTENT BLOCK -->
             {% block content %}
             {% endblock %}
 
             <!-- FOOTER PARTIAL -->
-            {% include 'include/footer.html' %}
+            {% include 'tradelog/include/footer.html' %}
         </main>
     </div>
 
     <!-- FLOATING AI ASSISTANT -->
-    {% include 'include/ai_widget.html' %}
+    {% include 'tradelog/include/ai_widget.html' %}
 
     <!-- TRADE DETAILS MODAL -->
     <div class="modal fade" id="tradeDetailsModal" tabindex="-1" aria-hidden="true">
