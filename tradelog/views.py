@@ -8,16 +8,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.shortcuts import render
-from .models import Stock
-import json
-from django.http import JsonResponse
 from django.conf import settings
 from google import genai
-from .models import Stock
 
-from .models import UserProfile, TradeJournal, TradeChartImage
-
+# Models
+from .models import Crypto, UserProfile, TradeJournal, TradeChartImage
 
 @login_required
 def dashboard(request):
@@ -131,36 +126,52 @@ from .services.nse_service import fetch_nse_market_data
 
 
 
+def crypto_screener_view(request):
+    # Fetch live crypto derivatives market data (e.g. from Bybit, Binance, or DB)
+    all_cryptos = fetch_crypto_market_data()
 
-def nse_screener_view(request):
-    all_stocks = fetch_nse_market_data()
-
-    # Get search/filter inputs from GET request
-    min_price = request.GET.get('min_price', '')
-    max_price = request.GET.get('max_price', '')
+    # Get search/filter inputs from GET parameters
+    category_filter = request.GET.get('category', 'ALL')
     performance_filter = request.GET.get('performance', 'ALL')
+    min_turnover = request.GET.get('min_turnover', '')
+    max_funding_rate = request.GET.get('max_funding_rate', '')
 
-    filtered_stocks = []
+    filtered_cryptos = []
 
-    min_p = float(min_price) if min_price else 0.0
-    max_p = float(max_price) if max_price else 1000000.0
+    min_vol = float(min_turnover) if min_turnover else 0.0
+    max_funding = float(max_funding_rate) if max_funding_rate else 100.0
 
-    for stock in all_stocks:
-        if min_p <= stock['price'] <= max_p:
-            if performance_filter == 'GAINERS' and stock['change'] <= 0:
-                continue
-            if performance_filter == 'LOSERS' and stock['change'] >= 0:
-                continue
-            filtered_stocks.append(stock)
+    for crypto in all_cryptos:
+        # Filter by Category (Linear Perpetual, Inverse, Spot, etc.)
+        if category_filter != 'ALL' and crypto.get('category') != category_filter:
+            continue
+
+        # Filter by Performance (Gainers vs. Losers)
+        if performance_filter == 'GAINERS' and crypto.get('change_pct', 0) <= 0:
+            continue
+        if performance_filter == 'LOSERS' and crypto.get('change_pct', 0) >= 0:
+            continue
+
+        # Filter by Min 24h Turnover / Volume ($M)
+        if crypto.get('turnover_m', 0) < min_vol:
+            continue
+
+        # Filter by Max Funding Rate (%)
+        if crypto.get('funding_rate', 0) > max_funding:
+            continue
+
+        filtered_cryptos.append(crypto)
 
     context = {
-        'stocks': filtered_stocks,
-        'min_price': min_price,
-        'max_price': max_price,
+        'cryptos': filtered_cryptos,
+        'category_filter': category_filter,
         'performance_filter': performance_filter,
-        'total_count': len(filtered_stocks)
+        'min_turnover': min_turnover,
+        'max_funding_rate': max_funding_rate,
+        'total_count': len(filtered_cryptos)
     }
-    return render(request, 'tradelog/stock_screener.html', context)
+
+    return render(request, 'tradelog/crypto_screener.html', context)
 
 
 
@@ -191,7 +202,7 @@ def dashboard_view(request):
 
 
 
-def ask_stock_ai(request):
+def ask_crypto_ai(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
@@ -202,23 +213,24 @@ def ask_stock_ai(request):
         if not user_prompt:
             return JsonResponse({'status': 'error', 'message': 'Prompt cannot be empty.'}, status=400)
 
-        # 1. Fetch current stock context from your database
-        stocks = Stock.objects.all()
-        stock_summary = [
-            f"Ticker: {s.ticker}, Company: {s.company_name}, Sector: {s.sector}, "
-            f"Price: KES {s.price}, 24h Change: {s.change_pct}%, P/E: {s.pe_ratio or 'N/A'}, "
-            f"Div Yield: {s.div_yield}%, Signal: {s.signal}"
-            for s in stocks
+        # 1. Fetch current crypto market context from your database
+        cryptos = Crypto.objects.all()
+        crypto_summary = [
+            f"Symbol: {c.symbol}, Pair: {c.base_asset}/{c.quote_asset}, Category: {c.category}, "
+            f"Mark Price: USDT {c.mark_price}, 24h Change: {c.change_pct}%, "
+            f"Funding Rate: {c.funding_rate}%, Open Interest: {c.open_interest}, "
+            f"24h Turnover: ${c.turnover}, Signal: {c.signal}"
+            for c in cryptos
         ]
-        context_str = "\n".join(stock_summary)
+        context_str = "\n".join(crypto_summary)
 
         # 2. Build system instructions and combined prompt
         system_instruction = (
-            "You are an expert quantitative analyst and stock market advisor. "
-            "Use the provided stock data to answer the user's question concisely. "
-            "Highlight specific tickers and metrics (P/E, Dividend Yield). "
+            "You are an expert quantitative crypto analyst and derivatives trading advisor. "
+            "Use the provided market data to answer the user's question concisely. "
+            "Highlight specific pairs and quantitative metrics (Funding Rate, Open Interest, 24h Turnover, Signals). "
             "Format your response with minimal, clean HTML tags like <strong> and <ul>.\n\n"
-            f"CURRENT MARKET DATA:\n{context_str}\n\n"
+            f"CURRENT CRYPTO MARKET DATA:\n{context_str}\n\n"
             f"USER QUESTION: {user_prompt}"
         )
 

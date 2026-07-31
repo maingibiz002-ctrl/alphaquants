@@ -59,14 +59,12 @@ class TradeChartImage(models.Model):
 
 from django.db import models
 
-class Stock(models.Model):
-    SECTOR_CHOICES = [
-        ('Banking', 'Banking'),
-        ('Telecommunication', 'Telecommunication & Tech'),
-        ('Energy', 'Energy & Petroleum'),
-        ('Manufacturing', 'Manufacturing & Allied'),
-        ('Insurance', 'Insurance'),
-        ('Commercial', 'Commercial & Services'),
+class Crypto(models.Model):
+    CATEGORY_CHOICES = [
+        ('Linear Perpetual', 'USDT Perpetual'),
+        ('USDC Perpetual', 'USDC Perpetual'),
+        ('Inverse Perpetual', 'Inverse Perpetual'),
+        ('Spot', 'Spot Trading'),
     ]
 
     SIGNAL_CHOICES = [
@@ -75,20 +73,23 @@ class Stock(models.Model):
         ('NEUTRAL', 'HOLD'),
     ]
 
-    ticker = models.CharField(max_length=10, unique=True)
-    company_name = models.CharField(max_length=100)
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICES)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    symbol = models.CharField(max_length=20, unique=True, help_text="e.g. BTCUSDT")
+    base_asset = models.CharField(max_length=10, help_text="e.g. BTC")
+    quote_asset = models.CharField(max_length=10, default='USDT', help_text="e.g. USDT")
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='Linear Perpetual')
+    mark_price = models.DecimalField(max_digits=16, decimal_places=4)
     change_pct = models.FloatField(help_text="24-hour percentage change")
-    pe_ratio = models.FloatField(null=True, blank=True)
-    div_yield = models.FloatField(default=0.0, help_text="Dividend yield percentage")
-    volume = models.CharField(max_length=20, help_text="e.g. 4.2M")
-    market_cap = models.CharField(max_length=20, help_text="e.g. 729.1B")
+    funding_rate = models.FloatField(default=0.0, help_text="8-hour funding rate percentage (e.g. 0.0100)")
+    open_interest = models.CharField(max_length=30, help_text="e.g. 12.4K BTC")
+    turnover = models.CharField(max_length=30, help_text="24h volume/turnover formatted e.g. 4.5B")
+    turnover_m = models.FloatField(default=0.0, help_text="Raw 24h turnover in Millions USD for filtering")
     signal = models.CharField(max_length=10, choices=SIGNAL_CHOICES, default='NEUTRAL')
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['ticker']
+        ordering = ['symbol']
+        verbose_name = "Crypto Asset"
+        verbose_name_plural = "Crypto Assets"
 
     def __str__(self):
-        return f"{self.ticker} - {self.company_name}"
+        return f"{self.symbol} ({self.category})"

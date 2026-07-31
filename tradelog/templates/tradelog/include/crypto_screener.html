@@ -6,13 +6,13 @@
         </div>
         <div>
             <h6 class="fw-bold text-white mb-0">Alpha AI Market Assistant</h6>
-            <span class="text-secondary extra-small">Ask AI to analyze metrics, rank value stocks, or evaluate risks.</span>
+            <span class="text-secondary extra-small">Ask AI to analyze metrics, rank value crypto, or evaluate risks.</span>
         </div>
     </div>
 
     <!-- AI Query Input Box -->
     <div class="input-group mb-2">
-        <input type="text" id="aiQueryInput" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Which banking stock has the safest payout ratio and low P/E?">
+        <input type="text" id="aiQueryInput" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Which crypto pair has high open interest with a positive funding rate?">
         <button class="btn btn-primary px-4" type="button" id="askAiBtn" onclick="sendAiScreenerQuery()">
             <i class="bi bi-stars me-1"></i> Ask AI
         </button>
@@ -21,9 +21,9 @@
     <!-- Quick Prompt Suggestions -->
     <div class="d-flex flex-wrap gap-2 mb-2">
         <span class="text-secondary extra-small align-self-center me-1">Quick Prompts:</span>
-        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Find undervalue banking stocks with P/E below 6')">Undervalued Banks</button>
-        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Which stock gives the best dividend yield above 7%?')">High Dividend</button>
-        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Compare SCOM vs EQTY based on valuation and signals')">SCOM vs EQTY</button>
+        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Find high volume crypto pairs with positive 24h change')">High Volume Gainers</button>
+        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Which perpetual derivative has the highest negative funding rate?')">Short Squeeze Risk</button>
+        <button class="btn btn-outline-secondary btn-sm extra-small py-0 px-2" onclick="setAiPrompt('Compare BTCUSDT vs ETHUSDT based on open interest and signals')">BTCUSDT vs ETHUSDT</button>
     </div>
 
     <!-- AI Output Box (Hidden by Default) -->
@@ -42,37 +42,36 @@
 <div class="row g-3 mb-4">
     <!-- Search Input -->
     <div class="col-12 col-md-3">
-        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Search Ticker / Name</label>
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Search Ticker / Pair</label>
         <div class="input-group">
             <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
-            <input type="text" id="screenerSearch" class="form-control bg-dark text-white border-secondary" placeholder="e.g. SCOM, EQTY...">
+            <input type="text" id="screenerSearch" class="form-control bg-dark text-white border-secondary" placeholder="e.g. BTCUSDT, ETHUSDT...">
         </div>
     </div>
 
-    <!-- Sector Filter -->
+    <!-- Category / Asset Type Filter -->
     <div class="col-12 col-md-3">
-        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Sector</label>
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Contract Type</label>
         <select id="sectorFilter" class="form-select bg-dark text-white border-secondary">
-            <option value="ALL" selected>All Sectors</option>
-            <option value="Banking">Banking</option>
-            <option value="Telecommunication">Telecommunication & Tech</option>
-            <option value="Energy">Energy & Petroleum</option>
-            <option value="Manufacturing">Manufacturing & Allied</option>
-            <option value="Insurance">Insurance</option>
-            <option value="Commercial">Commercial & Services</option>
+            <option value="ALL" selected>All Categories</option>
+            <option value="Linear Perpetual">USDT Perpetual</option>
+            <option value="USDC Perpetual">USDC Perpetual</option>
+
+            <option value="Inverse Perpetual">Inverse Perpetual</option>
+            <option value="Spot">Spot Trading</option>
         </select>
     </div>
 
-    <!-- P/E Ratio Range -->
+    <!-- Max Funding Rate Filter -->
     <div class="col-12 col-md-2">
-        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Max P/E Ratio</label>
-        <input type="number" id="peFilter" class="form-control bg-dark text-white border-secondary" placeholder="e.g. 15" step="0.1">
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Max Funding Rate (%)</label>
+        <input type="number" id="peFilter" class="form-control bg-dark text-white border-secondary" placeholder="e.g. 0.05" step="0.001">
     </div>
 
-    <!-- Min Dividend Yield -->
+    <!-- Min 24h Volume Filter -->
     <div class="col-12 col-md-2">
-        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Min Div Yield (%)</label>
-        <input type="number" id="divFilter" class="form-control bg-dark text-white border-secondary" placeholder="e.g. 5.0" step="0.1">
+        <label class="form-label text-secondary extra-small fw-bold text-uppercase">Min 24h Vol ($M)</label>
+        <input type="number" id="divFilter" class="form-control bg-dark text-white border-secondary" placeholder="e.g. 50" step="1">
     </div>
 
     <!-- Action Buttons -->
@@ -86,84 +85,96 @@
     </div>
 </div>
 
-<!-- STOCK LIST TABLE -->
+<!-- CRYPTO & DERIVATIVES LIST TABLE -->
 <div class="table-responsive">
     <table class="table table-dark table-hover align-middle mb-0" id="screenerTable">
         <thead>
             <tr class="text-secondary extra-small text-uppercase">
-                <th>Ticker / Name</th>
-                <th>Sector</th>
-                <th>Price (KES)</th>
+                <th>Symbol / Pair</th>
+                <th>Category</th>
+                <th>Mark Price (USDT)</th>
                 <th>24h Change</th>
-                <th>P/E Ratio</th>
-                <th>Div Yield</th>
-                <th>Volume</th>
-                <th>Market Cap</th>
+                <th>Funding Rate</th>
+                <th>Open Interest</th>
+                <th>24h Turnover</th>
                 <th>Signal</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for stock in stocks %}
-            <tr class="stock-row" data-sector="{{ stock.sector }}" data-pe="{{ stock.pe_ratio }}" data-div="{{ stock.div_yield }}">
+            {% for crypto in cryptos %}
+            <tr class="stock-row" data-sector="{{ crypto.category }}" data-pe="{{ crypto.funding_rate }}" data-div="{{ crypto.turnover_m }}">
                 <td>
-                    <div class="fw-bold text-white">{{ stock.ticker }}</div>
-                    <div class="extra-small text-secondary">{{ stock.company_name }}</div>
+                    <div class="fw-bold text-white">{{ crypto.symbol }}</div>
+                    <div class="extra-small text-secondary">{{ crypto.base_asset }}/{{ crypto.quote_asset }}</div>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-secondary">{{ stock.sector }}</span></td>
-                <td class="fw-bold text-white">{{ stock.price|floatformat:2 }}</td>
-                <td class="{% if stock.change_pct >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
-                    {% if stock.change_pct >= 0 %}+{% endif %}{{ stock.change_pct|floatformat:2 }}%
+                <td><span class="badge bg-secondary-subtle text-secondary">{{ crypto.category }}</span></td>
+                <td class="fw-bold text-white">{{ crypto.mark_price|floatformat:2 }}</td>
+                <td class="{% if crypto.change_pct >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
+                    {% if crypto.change_pct >= 0 %}+{% endif %}{{ crypto.change_pct|floatformat:2 }}%
                 </td>
-                <td>{{ stock.pe_ratio|default:"N/A" }}</td>
-                <td>{{ stock.div_yield }}%</td>
-                <td>{{ stock.volume }}</td>
-                <td>{{ stock.market_cap }}</td>
+                <td class="{% if crypto.funding_rate > 0 %}text-warning{% elif crypto.funding_rate < 0 %}text-info{% else %}text-white{% endif %}">
+                    {{ crypto.funding_rate|floatformat:4 }}%
+                </td>
+                <td>{{ crypto.open_interest }}</td>
+                <td>${{ crypto.turnover }}</td>
                 <td>
-                    {% if stock.signal == 'BULLISH' %}
+                    {% if crypto.signal == 'BULLISH' %}
                         <span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-up-right me-1"></i>BUY</span>
-                    {% elif stock.signal == 'BEARISH' %}
+                    {% elif crypto.signal == 'BEARISH' %}
                         <span class="badge bg-danger-subtle text-danger"><i class="bi bi-arrow-down-right me-1"></i>SELL</span>
                     {% else %}
                         <span class="badge bg-warning-subtle text-warning"><i class="bi bi-dash-lg me-1"></i>HOLD</span>
                     {% endif %}
                 </td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="viewStockDetails('{{ stock.ticker }}')">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewStockDetails('{{ crypto.symbol }}')">
                         <i class="bi bi-graph-up me-1"></i> Analyze
                     </button>
                 </td>
             </tr>
             {% empty %}
             <!-- Placeholder rows if database context isn't passed yet -->
-            <tr class="stock-row" data-sector="Telecommunication" data-pe="12.4" data-div="6.8">
+            <tr class="stock-row" data-sector="Linear Perpetual" data-pe="0.0100" data-div="4500">
                 <td>
-                    <div class="fw-bold text-white">SCOM</div>
-                    <div class="extra-small text-secondary">Safaricom PLC</div>
+                    <div class="fw-bold text-white">BTCUSDT</div>
+                    <div class="extra-small text-secondary">Bitcoin / USDT Perpetual</div>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-light">Telecommunication</span></td>
-                <td class="fw-bold text-white">18.20</td>
-                <td class="text-success fw-bold">+2.25%</td>
-                <td>12.4</td>
-                <td>6.8%</td>
-                <td>4.2M</td>
-                <td>729.1B</td>
+                <td><span class="badge bg-secondary-subtle text-light">Linear Perpetual</span></td>
+                <td class="fw-bold text-white">64,250.00</td>
+                <td class="text-success fw-bold">+3.45%</td>
+                <td class="text-warning">0.0100%</td>
+                <td>12.4K BTC</td>
+                <td>$4.5B</td>
                 <td><span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-up-right me-1"></i>BUY</span></td>
                 <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-graph-up me-1"></i> Analyze</button></td>
             </tr>
-            <tr class="stock-row" data-sector="Banking" data-pe="4.1" data-div="8.5">
+            <tr class="stock-row" data-sector="Linear Perpetual" data-pe="-0.0050" data-div="2100">
                 <td>
-                    <div class="fw-bold text-white">EQTY</div>
-                    <div class="extra-small text-secondary">Equity Group Holdings</div>
+                    <div class="fw-bold text-white">ETHUSDT</div>
+                    <div class="extra-small text-secondary">Ethereum / USDT Perpetual</div>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-light">Banking</span></td>
-                <td class="fw-bold text-white">47.50</td>
-                <td class="text-danger fw-bold">-0.84%</td>
-                <td>4.1</td>
-                <td>8.5%</td>
-                <td>1.8M</td>
-                <td>179.2B</td>
+                <td><span class="badge bg-secondary-subtle text-light">Linear Perpetual</span></td>
+                <td class="fw-bold text-white">3,480.50</td>
+                <td class="text-danger fw-bold">-1.20%</td>
+                <td class="text-info">-0.0050%</td>
+                <td>45.2K ETH</td>
+                <td>$2.1B</td>
                 <td><span class="badge bg-warning-subtle text-warning"><i class="bi bi-dash-lg me-1"></i>HOLD</span></td>
+                <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-graph-up me-1"></i> Analyze</button></td>
+            </tr>
+            <tr class="stock-row" data-sector="Linear Perpetual" data-pe="0.0350" data-div="850">
+                <td>
+                    <div class="fw-bold text-white">SOLUSDT</div>
+                    <div class="extra-small text-secondary">Solana / USDT Perpetual</div>
+                </td>
+                <td><span class="badge bg-secondary-subtle text-light">Linear Perpetual</span></td>
+                <td class="fw-bold text-white">142.80</td>
+                <td class="text-success fw-bold">+8.15%</td>
+                <td class="text-warning">0.0350%</td>
+                <td>1.8M SOL</td>
+                <td>$850M</td>
+                <td><span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-up-right me-1"></i>BUY</span></td>
                 <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-graph-up me-1"></i> Analyze</button></td>
             </tr>
             {% endfor %}
@@ -191,11 +202,11 @@
 
         // Visual loading state
         responseContainer.classList.remove('d-none');
-        responseText.innerHTML = '<span class="text-secondary"><i class="bi bi-arrow-repeat spin me-2"></i>Analyzing market metrics and stock indicators...</span>';
+        responseText.innerHTML = '<span class="text-secondary"><i class="bi bi-arrow-repeat spin me-2"></i>Analyzing crypto indicators, orderbook depth, and derivative funding rates...</span>';
         askBtn.disabled = true;
 
         // Post request to Django backend endpoint
-        fetch('/api/ask-stock-ai/', {
+        fetch('/api/ask-crypto-ai/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -213,7 +224,7 @@
         })
         .catch(err => {
             // Fallback response for demonstration before backend view is linked
-            responseText.innerHTML = `<strong>AI Recommendation:</strong> Based on current market filters, <strong>EQTY</strong> presents a strong value proposition with a low P/E ratio of 4.1 and high dividend yield of 8.5%. For dividend growth, <strong>SCOM</strong> remains a steady candidate with high trading liquidity.`;
+            responseText.innerHTML = `<strong>AI Recommendation:</strong> Based on market signals, <strong>SOLUSDT</strong> shows continuous bullish momentum (+8.15%) with active volume growth. <strong>ETHUSDT</strong> maintains a slightly negative funding rate (-0.0050%), indicating potential short-accumulation before a reversal.`;
         })
         .finally(() => {
             askBtn.disabled = false;
@@ -228,8 +239,8 @@
     function applyScreenerFilters() {
         const search = document.getElementById('screenerSearch').value.toLowerCase();
         const sector = document.getElementById('sectorFilter').value;
-        const maxPe = parseFloat(document.getElementById('peFilter').value) || Infinity;
-        const minDiv = parseFloat(document.getElementById('divFilter').value) || 0;
+        const maxPe = parseFloat(document.getElementById('peFilter').value) || Infinity; // Repurposed for Max Funding Rate
+        const minDiv = parseFloat(document.getElementById('divFilter').value) || 0;       // Repurposed for Min Turnover/Volume ($M)
 
         const rows = document.querySelectorAll('#screenerTable .stock-row');
 
