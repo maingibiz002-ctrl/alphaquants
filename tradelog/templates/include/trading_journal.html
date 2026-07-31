@@ -3,27 +3,7 @@
     <div class="col-lg-7">
         <div class="glass-card p-4">
 
-            <!-- Screenshot Upload Dropzone -->
-            <div class="glass-card p-3 mb-4" style="border: 1px dashed #22c55e;">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div>
-                        <h6 class="mb-1 text-light fw-semibold">
-                            <i class="bi bi-magic me-2 text-success"></i>Auto-Fill via Screenshot
-                        </h6>
-                        <p class="text-secondary extra-small mb-0">Upload an MT4/MT5 or TradingView screenshot to extract trade details automatically.</p>
-                    </div>
-                    <div>
-                        <label for="tradeScreenshot" class="btn btn-green btn-sm px-3 py-2 cursor-pointer mb-0">
-                            <i class="bi bi-upload me-1"></i> Upload Image
-                        </label>
-                        <input type="file" id="tradeScreenshot" accept="image/*" class="d-none">
-                    </div>
-                </div>
-                
-                <div id="ocrStatusContainer" class="mt-2 d-none">
-                    <small id="ocrStatus" class="extra-small"></small>
-                </div>
-            </div>
+          
 
             <h4 class="fw-bold text-white mb-4"><i class="bi bi-journal-plus text-success me-2"></i>Log New Trade</h4>
             
@@ -210,71 +190,12 @@
                         fill: true
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        }
-    });
-
-    document.getElementById('tradeScreenshot').addEventListener('change', async function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const statusContainer = document.getElementById('ocrStatusContainer');
-        const statusText = document.getElementById('ocrStatus');
-        
-        statusContainer.classList.remove('d-none');
-        statusText.className = "extra-small text-info";
-        statusText.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i> Processing screenshot with OCR...';
-
-        const formData = new FormData();
-        formData.append('screenshot', file);
-        
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        formData.append('csrfmiddlewaretoken', csrfToken);
-
-        try {
-            const response = await fetch('/extract-trade/', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                const data = result.data;
-                const fieldMap = {
-                    'journalInstrument': data.instrument,
-                    'journalDirection': data.direction,
-                    'entryPrice': data.entry_price,
-                    'exitPrice': data.exit_price,
-                    'stopLoss': data.stop_loss,
-                    'takeProfit': data.take_profit,
-                    'lotSize': data.lots,
-                    'pnlValue': data.net_pnl
-                };
-
-                for (const [elementId, val] of Object.entries(fieldMap)) {
-                    const element = document.getElementById(elementId);
-                    if (element && val !== null && val !== undefined) {
-                        element.value = val;
-                        element.style.borderColor = '#22c55e';
-                        element.style.boxShadow = '0 0 8px rgba(34, 197, 94, 0.4)';
-                        setTimeout(() => { 
-                            element.style.borderColor = ''; 
-                            element.style.boxShadow = '';
-                        }, 2500);
-                    }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } } 
                 }
-
-                statusText.className = "extra-small text-success";
-                statusText.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Fields populated successfully from screenshot!';
-            } else {
-                statusText.className = "extra-small text-danger";
-                statusText.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Error: ' + (result.message || 'Could not parse image.');
-            }
-        } catch (err) {
-            statusText.className = "extra-small text-danger";
-            statusText.innerHTML = '<i class="bi bi-exclamation-octagon-fill me-1"></i> Server error processing image.';
+            });
         }
     });
 </script>
