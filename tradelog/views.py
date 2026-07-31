@@ -33,7 +33,7 @@ def dashboard(request):
         'win_rate': win_rate,
         'api_token': api_token,
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, 'tadelog/dashboard.html', context)
 
 
 @login_required
