@@ -160,3 +160,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",  # Or "django.contrib.staticfiles.storage.StaticFilesStorage"
     },
 }
+
+
+# Retrieve the key from OS environment
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')

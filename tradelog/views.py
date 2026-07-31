@@ -10,6 +10,11 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from .models import Stock
+import json
+from django.http import JsonResponse
+from django.conf import settings
+from google import genai
+from .models import Stock
 
 from .models import UserProfile, TradeJournal, TradeChartImage
 
@@ -181,3 +186,53 @@ def dashboard_view(request):
     }
 
     return render(request, 'tradelog/dashboard.html', context)
+
+
+
+
+
+def ask_stock_ai(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        user_prompt = data.get('prompt', '').strip()
+
+        if not user_prompt:
+            return JsonResponse({'status': 'error', 'message': 'Prompt cannot be empty.'}, status=400)
+
+        # 1. Fetch current stock context from your database
+        stocks = Stock.objects.all()
+        stock_summary = [
+            f"Ticker: {s.ticker}, Company: {s.company_name}, Sector: {s.sector}, "
+            f"Price: KES {s.price}, 24h Change: {s.change_pct}%, P/E: {s.pe_ratio or 'N/A'}, "
+            f"Div Yield: {s.div_yield}%, Signal: {s.signal}"
+            for s in stocks
+        ]
+        context_str = "\n".join(stock_summary)
+
+        # 2. Build system instructions and combined prompt
+        system_instruction = (
+            "You are an expert quantitative analyst and stock market advisor. "
+            "Use the provided stock data to answer the user's question concisely. "
+            "Highlight specific tickers and metrics (P/E, Dividend Yield). "
+            "Format your response with minimal, clean HTML tags like <strong> and <ul>.\n\n"
+            f"CURRENT MARKET DATA:\n{context_str}\n\n"
+            f"USER QUESTION: {user_prompt}"
+        )
+
+        # 3. Call the Gemini API
+        client = genai.Client(api_key=getattr(settings, 'GEMINI_API_KEY', ''))
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=system_instruction,
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'response': response.text
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
