@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body class="bg-black text-white p-4">
+    <!-- Securely embed backend arbitrage data into the DOM for JavaScript -->
+    {{ arbitrage_opportunities_json|json_script:"backend-opportunities-data" }}
+
     <div class="container" style="max-width: 1100px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="text-3xl font-bold mb-0 text-warning">Delta-Neutral Arbitrage Live Engine</h1>
@@ -43,54 +46,20 @@
             </div>
         </div>
 
-        <!-- OPPORTUNITIES SECTION -->
+        <!-- OPPORTUNITIES & EXECUTION PANELS SECTION -->
         <div class="card bg-dark text-white border-secondary p-4 shadow-sm mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="mb-0 text-warning">
-                    <i class="bi bi-lightning-fill me-2"></i> Funding Rate Arbitrage Opportunities
+                    <i class="bi bi-lightning-fill me-2"></i> Rotating Funding Rate Arbitrage Opportunities (Showing 3)
                 </h4>
-                <span class="badge bg-primary fs-6" id="opportunity-count">
-                    {{ arbitrage_opportunities|length }} Found
-                </span>
+                <span class="badge bg-primary fs-6" id="opportunity-count">0 Active Displayed</span>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0">
-                    <thead>
-                        <tr class="text-secondary small">
-                            <th scope="col">SYMBOL</th>
-                            <th scope="col">8H RATE</th>
-                            <th scope="col">ANNUALIZED APR</th>
-                            <th scope="col">RECOMMENDED STRATEGY</th>
-                            <th scope="col">SETTLEMENT TIME</th>
-                            <th scope="col" class="text-end">ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="opportunities-tbody">
-                        {% for item in arbitrage_opportunities %}
-                        <tr>
-                            <td class="fw-bold text-white">{{ item.symbol }}</td>
-                            <td class="{% if item.funding_rate_8h >= 0 %}text-success{% else %}text-danger{% endif %}">
-                                {{ item.funding_rate_8h }}%
-                            </td>
-                            <td>{{ item.annualized_apr }}%</td>
-                            <td>
-                                <span class="badge bg-secondary text-light">{{ item.recommended_strategy }}</span>
-                            </td>
-                            <td class="text-muted small">{{ item.next_funding_time }}</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-warning deploy-btn" data-symbol="{{ item.symbol }}">Execute</button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <!-- Dynamic Rotating Container -->
+            <div id="opportunities-container">
+                <div class="text-center text-muted py-4">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Loading opportunities from backend...
+                </div>
             </div>
         </div>
 
@@ -145,87 +114,199 @@
     </div>
 
     <script>
-        // Real-time asynchronous polling loop linked to the new arbitrage_data_api view
+        let rotationOffset = 0;
+
+        // Load initial data pushed securely from Django backend script tag
+        function getBackendOpportunities() {
+            try {
+                const scriptTag = document.getElementById('backend-opportunities-data');
+                return scriptTag ? JSON.parse(scriptTag.textContent) : [];
+            } catch (e) {
+                console.error("Error parsing backend data:", e);
+                return [];
+            }
+        }
+
+        let cachedOpportunities = getBackendOpportunities();
+
+        document.addEventListener('click', async function(e) {
+            if (e.target.closest('.toggle-executor-btn')) {
+                const btn = e.target.closest('.toggle-executor-btn');
+                const targetSelector = btn.getAttribute('data-target');
+                const panel = document.querySelector(targetSelector);
+                if (panel) {
+                    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+                }
+            }
+
+            if (e.target.closest('.execute-trade-btn')) {
+                const btn = e.target.closest('.execute-trade-btn');
+                const symbol = btn.getAttribute('data-symbol');
+                const executorPanel = btn.closest('.executor-panel');
+                
+                const size = executorPanel.querySelector('.size-input').value;
+                const leverage = executorPanel.querySelector('.leverage-input').value;
+
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Deploying...`;
+
+                try {
+                    let response = await fetch('/api/execute-trade/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ symbol: symbol, size: size, leverage: leverage })
+                    });
+
+                    let result = await response.json();
+                    if (response.ok) {
+                        alert('Arbitrage deployed successfully for ' + symbol);
+                        location.reload();
+                    } else {
+                        alert('Execution failed: ' + (result.error || 'Unknown error'));
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="bi bi-play-fill me-1"></i> Deploy Arb`;
+                    }
+                } catch (err) {
+                    console.error('Trade execution error:', err);
+                    alert('Network error during trade execution.');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="bi bi-play-fill me-1"></i> Deploy Arb`;
+                }
+            }
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function renderOpportunities(allOpps) {
+            if (allOpps.length > 3) {
+                rotationOffset = (rotationOffset + 3) % allOpps.length;
+            } else {
+                rotationOffset = 0;
+            }
+
+            let opps = [];
+            if (allOpps.length > 0) {
+                for (let i = 0; i < Math.min(3, allOpps.length); i++) {
+                    let index = (rotationOffset + i) % allOpps.length;
+                    opps.push(allOpps[index]);
+                }
+            }
+
+            document.getElementById('opportunity-count').innerText = opps.length + " Active Displayed";
+            
+            let container = document.getElementById('opportunities-container');
+            if (opps.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
+                    </div>`;
+            } else {
+                container.innerHTML = opps.map((item, index) => {
+                    let rawRate = item['funding_rate_8h_%'] !== undefined ? item['funding_rate_8h_%'] : (item.funding_rate_8h || 0);
+                    let rawApr = item['annualized_apr_%'] !== undefined ? item['annualized_apr_%'] : (item.annualized_apr || 0);
+                    
+                    let rate = Number(rawRate).toFixed(4);
+                    let apr = Number(rawApr).toFixed(2);
+                    let strategy = item.recommended_strategy || "Buy Spot / Short Perp";
+                    let settles = item.next_funding_time || "N/A";
+
+                    return `
+                    <div class="card bg-black border border-secondary p-3 mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <span class="fs-5 fw-bold text-white">${item.symbol}</span>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="text-secondary small d-block">8H RATE</span>
+                                <span class="fw-bold ${Number(rate) >= 0 ? 'text-success' : 'text-danger'}">
+                                    ${rate}%
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="text-secondary small d-block">ANNUALIZED APR</span>
+                                <span class="fw-bold text-white">${apr}%</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-secondary text-light">${strategy}</span>
+                                <span class="text-muted small d-block mt-1">Settles: ${settles}</span>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-sm btn-warning fw-bold px-3 toggle-executor-btn" data-target="#executor-${index}">
+                                    <i class="bi bi-sliders me-1"></i> Configure & Execute
+                                </button>
+                            </div>
+                        </div>
+                        <div id="executor-${index}" class="mt-3 pt-3 border-top border-secondary executor-panel" style="display: none;">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-4">
+                                    <label class="text-secondary small mb-1">Position Size (BTC)</label>
+                                    <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary size-input" value="0.1" step="0.01">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="text-secondary small mb-1">Leverage</label>
+                                    <select class="form-select form-select-sm bg-dark text-white border-secondary leverage-input">
+                                        <option value="1">1x (Spot / No Leverage)</option>
+                                        <option value="2">2x Leverage</option>
+                                        <option value="5">5x Leverage</option>
+                                        <option value="10">10x Leverage</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 text-end mt-4">
+                                    <button class="btn btn-sm btn-success px-4 fw-bold execute-trade-btn" data-symbol="${item.symbol}">
+                                        <i class="bi bi-play-fill me-1"></i> Deploy Arb
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;}).join('');
+            }
+        }
+
+        // Render immediately using backend initial push
+        renderOpportunities(cachedOpportunities);
+
+        // Continuous Polling Loop for Live Telemetry Updates
         setInterval(async () => {
             try {
                 let response = await fetch('/api/arbitrage-data/');
                 if (!response.ok) throw new Error('Network response was not ok');
                 let data = await response.json();
                 
-                // 1. Update Position Metrics
-                const metrics = data.position_metrics;
+                const metrics = data.position_metrics || {};
                 document.getElementById('live-status').innerText = metrics.status || "INACTIVE";
                 document.getElementById('live-spot').innerText = (metrics.spot_holdings || 0) + " BTC";
                 document.getElementById('live-futures').innerText = (metrics.futures_size || 0) + " BTC";
                 
                 let pnlElement = document.getElementById('live-pnl');
                 let pnlVal = metrics.unrealized_pnl || 0;
-                pnlElement.innerText = "$" + pnlVal.toFixed(2);
+                pnlElement.innerText = "$" + Number(pnlVal).toFixed(2);
                 pnlElement.className = pnlVal >= 0 ? "fs-4 fw-bold text-success mb-0" : "fs-4 fw-bold text-danger mb-0";
 
-                // 2. Update Arbitrage Opportunities Table dynamically
-                const opps = data.arbitrage_opportunities || [];
-                document.getElementById('opportunity-count').innerText = opps.length + " Found";
-                
-                let oppsTbody = document.getElementById('opportunities-tbody');
-                if (opps.length === 0) {
-                    oppsTbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
-                            </td>
-                        </tr>`;
-                } else {
-                    oppsTbody.innerHTML = opps.map(item => `
-                        <tr>
-                            <td class="fw-bold text-white">${item.symbol}</td>
-                            <td class="${item.funding_rate_8h >= 0 ? 'text-success' : 'text-danger'}">
-                                ${item.funding_rate_8h}%
-                            </td>
-                            <td>${item.annualized_apr}%</td>
-                            <td><span class="badge bg-secondary text-light">${item.recommended_strategy}</span></td>
-                            <td class="text-muted small">${item.next_funding_time}</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-warning deploy-btn" data-symbol="${item.symbol}">Execute</button>
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-
-                // 3. Update Executed Trades Log Table dynamically
-                const execs = data.executed_trades || [];
-                document.getElementById('executed-count').innerText = execs.length + " Active / Logged";
-                
-                let execsTbody = document.getElementById('executed-tbody');
-                if (execs.length === 0) {
-                    execsTbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <i class="bi bi-clock-history me-1"></i> No trades executed yet. Pick an opportunity above to deploy.
-                            </td>
-                        </tr>`;
-                } else {
-                    execsTbody.innerHTML = execs.map(trade => `
-                        <tr>
-                            <td class="fw-bold text-info">
-                                <span class="badge bg-dark border border-info text-info">${trade.leg}</span>
-                            </td>
-                            <td class="text-white">${trade.symbol}</td>
-                            <td>${trade.amount}</td>
-                            $${trade.price ? trade.price : '0.00'}
-                            <td class="text-muted small font-monospace">${trade.order_id}</td>
-                            <td class="text-end">
-                                <span class="badge bg-success text-light">Filled</span>
-                            </td>
-                        </tr>
-                    `).join('');
-                }
+                cachedOpportunities = data.arbitrage_opportunities || [];
+                renderOpportunities(cachedOpportunities);
 
                 document.getElementById('connection-status').className = "badge bg-success font-monospace p-2";
                 document.getElementById('connection-status').innerText = "● LIVE STREAM ACTIVE";
 
             } catch (err) {
-                console.error("Failed to fetch asynchronous arbitrage telemetry", err);
+                console.error("Failed to fetch telemetry", err);
                 document.getElementById('connection-status').className = "badge bg-danger font-monospace p-2";
                 document.getElementById('connection-status').innerText = "○ CONNECTION LOST";
             }

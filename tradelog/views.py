@@ -77,11 +77,25 @@ def arbitrage_data_api(request):
     try:
         executor = RealTimeArbitrageExecutor()
         
-        # Scan opportunities
-        _, opportunities = executor.scan_opportunities()
+        # Scan opportunities safely
+        try:
+            _, opportunities = executor.scan_opportunities()
+        except Exception as scan_err:
+            print(f"Scan opportunities error: {scan_err}")
+            opportunities = []
         
-        # Fetch live position metrics
-        position_metrics = executor.get_position_metrics()
+        # Fetch live position metrics safely
+        try:
+            position_metrics = executor.get_position_metrics()
+        except Exception as metrics_err:
+            print(f"Position metrics error: {metrics_err}")
+            position_metrics = {
+                "status": "INACTIVE",
+                "spot_holdings": 0.0,
+                "futures_size": 0.0,
+                "unrealized_pnl": 0.0,
+                "margin": 0.0
+            }
         
         data = {
             "position_metrics": position_metrics,
@@ -90,9 +104,9 @@ def arbitrage_data_api(request):
         }
         return JsonResponse(data)
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # This will print the full traceback in your runserver terminal
         return JsonResponse({"error": str(e)}, status=500)
-
-
 @login_required
 def create_journal_entry(request):
     """
