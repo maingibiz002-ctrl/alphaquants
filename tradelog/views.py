@@ -14,6 +14,7 @@ from google import genai
 from django.shortcuts import render
 from funding_scanner import fetch_binance_funding_rates
 
+
 # Models
 from .models import Crypto, UserProfile, TradeJournal, TradeChartImage
 
@@ -255,18 +256,17 @@ def ask_crypto_ai(request):
 
 
 
-def dashboard_view(request):
-    """View that loads the dashboard with arbitrage opportunities."""
-    # Fetch live funding opportunities (minimum 5% APR)
+
+
+def dashboard(request):
+    # Fetch live funding rate arbitrage opportunities
     try:
-        opportunities = fetch_binance_funding_rates(min_apr=5.0)
+        arbitrage_opportunities = fetch_binance_funding_rates()
     except Exception as e:
-        opportunities = []
+        arbitrage_opportunities = []
         print(f"Error fetching funding rates: {e}")
 
     context = {
-        'funding_opportunities': opportunities,
-        'total_funding_opps': len(opportunities),
+        'arbitrage_opportunities': arbitrage_opportunities,
     }
-
     return render(request, 'tradelog/dashboard.html', context)

@@ -1,61 +1,49 @@
-<!-- tradelog/templates/tradelog/include/crypto_arbitrage.html -->
-<div class="card shadow-sm border-0 mb-4 bg-dark text-light">
-    <div class="card-header bg-transparent border-secondary d-flex justify-content-between align-items-center py-3">
-        <div>
-            <h5 class="mb-0 fw-bold text-white">⚡ Funding Rate Arbitrage Opportunities</h5>
-            <small class="text-muted">Live Binance USDT-M Perpetual Yields</small>
-        </div>
-        <span class="badge bg-primary fs-6">{{ total_funding_opps|default:0 }} Found</span>
+<div class="card bg-dark text-white border-secondary p-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0 text-warning">
+            <i class="bi bi-lightning-fill me-2"></i> Funding Rate Arbitrage Opportunities
+        </h4>
+        <span class="badge bg-primary fs-6" id="opportunity-count">
+            {{ arbitrage_opportunities|length }} Found
+        </span>
     </div>
 
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle mb-0">
-                <thead class="table-borderless border-bottom border-secondary text-secondary small text-uppercase">
-                    <tr>
-                        <th class="ps-3">Symbol</th>
-                        <th>8h Rate</th>
-                        <th>Annualized APR</th>
-                        <th>Recommended Strategy</th>
-                        <th>Settlement Time</th>
-                        <th class="pe-3 text-end">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for opp in funding_opportunities %}
-                    <tr>
-                        <td class="ps-3 fw-bold text-white">{{ opp.symbol }}</td>
-                        <td>
-                            <span class="{% if opp.funding_rate_8h > 0 %}text-success{% else %}text-danger{% endif %} fw-semibold">
-                                {% if opp.funding_rate_8h > 0 %}+{% endif %}{{ opp.funding_rate_8h }}%
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge {% if opp.annualized_apr > 0 %}bg-success{% else %}bg-danger{% endif %} px-2 py-1">
-                                {% if opp.annualized_apr > 0 %}+{% endif %}{{ opp.annualized_apr }}%
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge bg-secondary text-uppercase small">{{ opp.recommended_strategy }}</span>
-                        </td>
-                        <td class="small text-muted">{{ opp.next_funding_time|default:"N/A" }}</td>
-                        <td class="pe-3 text-end">
-                            <form method="POST" action="#" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="symbol" value="{{ opp.symbol }}">
-                                <button type="submit" class="btn btn-sm btn-outline-success">Execute</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
-                            No active arbitrage opportunities matching the threshold criteria right now.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-secondary small">
+                    <th scope="col">SYMBOL</th>
+                    <th scope="col">8H RATE</th>
+                    <th scope="col">ANNUALIZED APR</th>
+                    <th scope="col">RECOMMENDED STRATEGY</th>
+                    <th scope="col">SETTLEMENT TIME</th>
+                    <th scope="col" class="text-end">ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in arbitrage_opportunities %}
+                <tr>
+                    <td class="fw-bold text-white">{{ item.symbol }}</td>
+                    <td class="{% if item.rate >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ item.rate }}%
+                    </td>
+                    <td>{{ item.apr }}%</td>
+                    <td>
+                        <span class="badge bg-secondary text-light">{{ item.strategy }}</span>
+                    </td>
+                    <td class="text-muted small">{{ item.settlement_time }}</td>
+                    <td class="text-end">
+                        <a href="#" class="btn btn-sm btn-outline-warning">Execute</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
