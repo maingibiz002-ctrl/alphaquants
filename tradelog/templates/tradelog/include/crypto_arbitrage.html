@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body class="bg-black text-white p-4">
-    <div class="container max-w-5xl mx-auto">
-        <h1 class="text-3xl font-bold mb-4 text-warning">Delta-Neutral Arbitrage Live Engine</h1>
+    <div class="container" style="max-width: 1100px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-3xl font-bold mb-0 text-warning">Delta-Neutral Arbitrage Live Engine</h1>
+            <span class="badge bg-success font-monospace p-2" id="connection-status">● LIVE STREAM ACTIVE</span>
+        </div>
 
         <!-- REAL-TIME POSITION METRICS & FUNDING TRACKER -->
         <div class="row mb-4">
@@ -63,7 +66,7 @@
                             <th scope="col" class="text-end">ACTION</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="opportunities-tbody">
                         {% for item in arbitrage_opportunities %}
                         <tr>
                             <td class="fw-bold text-white">{{ item.symbol }}</td>
@@ -76,7 +79,7 @@
                             </td>
                             <td class="text-muted small">{{ item.next_funding_time }}</td>
                             <td class="text-end">
-                                <a href="#" class="btn btn-sm btn-outline-warning">Execute</a>
+                                <button class="btn btn-sm btn-outline-warning deploy-btn" data-symbol="{{ item.symbol }}">Execute</button>
                             </td>
                         </tr>
                         {% empty %}
@@ -114,7 +117,7 @@
                             <th scope="col" class="text-end">STATUS / ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="executed-tbody">
                         {% for trade in executed_trades %}
                         <tr>
                             <td class="fw-bold text-info">
@@ -142,25 +145,89 @@
     </div>
 
     <script>
-        // Optional JavaScript snippet to poll backend for real-time updates every 3 seconds
+        // Real-time asynchronous polling loop linked to the new arbitrage_data_api view
         setInterval(async () => {
             try {
-                let response = await fetch('/api/position-metrics/');
+                let response = await fetch('/api/arbitrage-data/');
+                if (!response.ok) throw new Error('Network response was not ok');
                 let data = await response.json();
                 
-                document.getElementById('live-status').innerText = data.status;
-                document.getElementById('live-spot').innerText = data.spot_holdings + " BTC";
-                document.getElementById('live-futures').innerText = data.futures_size + " BTC";
+                // 1. Update Position Metrics
+                const metrics = data.position_metrics;
+                document.getElementById('live-status').innerText = metrics.status || "INACTIVE";
+                document.getElementById('live-spot').innerText = (metrics.spot_holdings || 0) + " BTC";
+                document.getElementById('live-futures').innerText = (metrics.futures_size || 0) + " BTC";
                 
                 let pnlElement = document.getElementById('live-pnl');
-                pnlElement.innerText = "$" + data.unrealized_pnl.toFixed(2);
-                if (data.unrealized_pnl >= 0) {
-                    pnlElement.className = "fs-4 fw-bold text-success mb-0";
+                let pnlVal = metrics.unrealized_pnl || 0;
+                pnlElement.innerText = "$" + pnlVal.toFixed(2);
+                pnlElement.className = pnlVal >= 0 ? "fs-4 fw-bold text-success mb-0" : "fs-4 fw-bold text-danger mb-0";
+
+                // 2. Update Arbitrage Opportunities Table dynamically
+                const opps = data.arbitrage_opportunities || [];
+                document.getElementById('opportunity-count').innerText = opps.length + " Found";
+                
+                let oppsTbody = document.getElementById('opportunities-tbody');
+                if (opps.length === 0) {
+                    oppsTbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
+                            </td>
+                        </tr>`;
                 } else {
-                    pnlElement.className = "fs-4 fw-bold text-danger mb-0";
+                    oppsTbody.innerHTML = opps.map(item => `
+                        <tr>
+                            <td class="fw-bold text-white">${item.symbol}</td>
+                            <td class="${item.funding_rate_8h >= 0 ? 'text-success' : 'text-danger'}">
+                                ${item.funding_rate_8h}%
+                            </td>
+                            <td>${item.annualized_apr}%</td>
+                            <td><span class="badge bg-secondary text-light">${item.recommended_strategy}</span></td>
+                            <td class="text-muted small">${item.next_funding_time}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-warning deploy-btn" data-symbol="${item.symbol}">Execute</button>
+                            </td>
+                        </tr>
+                    `).join('');
                 }
+
+                // 3. Update Executed Trades Log Table dynamically
+                const execs = data.executed_trades || [];
+                document.getElementById('executed-count').innerText = execs.length + " Active / Logged";
+                
+                let execsTbody = document.getElementById('executed-tbody');
+                if (execs.length === 0) {
+                    execsTbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-clock-history me-1"></i> No trades executed yet. Pick an opportunity above to deploy.
+                            </td>
+                        </tr>`;
+                } else {
+                    execsTbody.innerHTML = execs.map(trade => `
+                        <tr>
+                            <td class="fw-bold text-info">
+                                <span class="badge bg-dark border border-info text-info">${trade.leg}</span>
+                            </td>
+                            <td class="text-white">${trade.symbol}</td>
+                            <td>${trade.amount}</td>
+                            $${trade.price ? trade.price : '0.00'}
+                            <td class="text-muted small font-monospace">${trade.order_id}</td>
+                            <td class="text-end">
+                                <span class="badge bg-success text-light">Filled</span>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('connection-status').className = "badge bg-success font-monospace p-2";
+                document.getElementById('connection-status').innerText = "● LIVE STREAM ACTIVE";
+
             } catch (err) {
-                console.error("Failed to fetch live position telemetry", err);
+                console.error("Failed to fetch asynchronous arbitrage telemetry", err);
+                document.getElementById('connection-status').className = "badge bg-danger font-monospace p-2";
+                document.getElementById('connection-status').innerText = "○ CONNECTION LOST";
             }
         }, 3000);
     </script>
