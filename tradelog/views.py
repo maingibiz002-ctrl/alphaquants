@@ -10,6 +10,9 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.conf import settings
 from google import genai
+# tradelog/views.py
+from django.shortcuts import render
+from funding_scanner import fetch_binance_funding_rates
 
 # Models
 from .models import Crypto, UserProfile, TradeJournal, TradeChartImage
@@ -248,3 +251,22 @@ def ask_crypto_ai(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+
+
+def dashboard_view(request):
+    """View that loads the dashboard with arbitrage opportunities."""
+    # Fetch live funding opportunities (minimum 5% APR)
+    try:
+        opportunities = fetch_binance_funding_rates(min_apr=5.0)
+    except Exception as e:
+        opportunities = []
+        print(f"Error fetching funding rates: {e}")
+
+    context = {
+        'funding_opportunities': opportunities,
+        'total_funding_opps': len(opportunities),
+    }
+
+    return render(request, 'tradelog/dashboard.html', context)
