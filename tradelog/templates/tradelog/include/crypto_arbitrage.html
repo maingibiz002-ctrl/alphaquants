@@ -1,49 +1,168 @@
-<div class="card bg-dark text-white border-secondary p-4 shadow-sm">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0 text-warning">
-            <i class="bi bi-lightning-fill me-2"></i> Funding Rate Arbitrage Opportunities
-        </h4>
-        <span class="badge bg-primary fs-6" id="opportunity-count">
-            {{ arbitrage_opportunities|length }} Found
-        </span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AlphaQuant - Live Arbitrage Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body class="bg-black text-white p-4">
+    <div class="container max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4 text-warning">Delta-Neutral Arbitrage Live Engine</h1>
+
+        <!-- REAL-TIME POSITION METRICS & FUNDING TRACKER -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+                    <p class="text-secondary small mb-1">POSITION STATUS</p>
+                    <p id="live-status" class="fs-4 fw-bold text-warning mb-0">{{ position_metrics.status }}</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+                    <p class="text-secondary small mb-1">SPOT HOLDINGS</p>
+                    <p id="live-spot" class="fs-4 fw-bold text-white mb-0">{{ position_metrics.spot_holdings }} BTC</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+                    <p class="text-secondary small mb-1">FUTURES SHORT</p>
+                    <p id="live-futures" class="fs-4 fw-bold text-danger mb-0">{{ position_metrics.futures_size }} BTC</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+                    <p class="text-secondary small mb-1">UNREALIZED PNL & FUNDING</p>
+                    <p id="live-pnl" class="fs-4 fw-bold {% if position_metrics.unrealized_pnl >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">
+                        ${{ position_metrics.unrealized_pnl }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPPORTUNITIES SECTION -->
+        <div class="card bg-dark text-white border-secondary p-4 shadow-sm mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 text-warning">
+                    <i class="bi bi-lightning-fill me-2"></i> Funding Rate Arbitrage Opportunities
+                </h4>
+                <span class="badge bg-primary fs-6" id="opportunity-count">
+                    {{ arbitrage_opportunities|length }} Found
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-secondary small">
+                            <th scope="col">SYMBOL</th>
+                            <th scope="col">8H RATE</th>
+                            <th scope="col">ANNUALIZED APR</th>
+                            <th scope="col">RECOMMENDED STRATEGY</th>
+                            <th scope="col">SETTLEMENT TIME</th>
+                            <th scope="col" class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in arbitrage_opportunities %}
+                        <tr>
+                            <td class="fw-bold text-white">{{ item.symbol }}</td>
+                            <td class="{% if item.funding_rate_8h >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ item.funding_rate_8h }}%
+                            </td>
+                            <td>{{ item.annualized_apr }}%</td>
+                            <td>
+                                <span class="badge bg-secondary text-light">{{ item.recommended_strategy }}</span>
+                            </td>
+                            <td class="text-muted small">{{ item.next_funding_time }}</td>
+                            <td class="text-end">
+                                <a href="#" class="btn btn-sm btn-outline-warning">Execute</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- EXECUTED TRADES SECTION -->
+        <div class="card bg-dark text-white border-secondary p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 text-info">
+                    <i class="bi bi-check2-circle me-2"></i> Executed Arbitrage Trades (Real-Time Log)
+                </h4>
+                <span class="badge bg-success fs-6" id="executed-count">
+                    {{ executed_trades|length }} Active / Logged
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-secondary small">
+                            <th scope="col">LEG / TYPE</th>
+                            <th scope="col">SYMBOL</th>
+                            <th scope="col">AMOUNT</th>
+                            <th scope="col">EXECUTION PRICE</th>
+                            <th scope="col">ORDER ID</th>
+                            <th scope="col" class="text-end">STATUS / ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trade in executed_trades %}
+                        <tr>
+                            <td class="fw-bold text-info">
+                                <span class="badge bg-dark border border-info text-info">{{ trade.leg }}</span>
+                            </td>
+                            <td class="text-white">{{ trade.symbol }}</td>
+                            <td>{{ trade.amount }}</td>
+                            <td>${% if trade.price %}{{ trade.price }}{% else %}0.00{% endif %}</td>
+                            <td class="text-muted small font-monospace">{{ trade.order_id }}</td>
+                            <td class="text-end">
+                                <span class="badge bg-success text-light">Filled</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-clock-history me-1"></i> No trades executed yet. Pick an opportunity above to deploy.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-dark table-hover align-middle mb-0">
-            <thead>
-                <tr class="text-secondary small">
-                    <th scope="col">SYMBOL</th>
-                    <th scope="col">8H RATE</th>
-                    <th scope="col">ANNUALIZED APR</th>
-                    <th scope="col">RECOMMENDED STRATEGY</th>
-                    <th scope="col">SETTLEMENT TIME</th>
-                    <th scope="col" class="text-end">ACTION</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in arbitrage_opportunities %}
-                <tr>
-                    <td class="fw-bold text-white">{{ item.symbol }}</td>
-                    <td class="{% if item.funding_rate_8h_% >= 0 %}text-success{% else %}text-danger{% endif %}">
-                        {{ item.funding_rate_8h_% }}%
-                    </td>
-                    <td>{{ item.annualized_apr_% }}%</td>
-                    <td>
-                        <span class="badge bg-secondary text-light">{{ item.recommended_strategy }}</span>
-                    </td>
-                    <td class="text-muted small">{{ item.next_funding_time }}</td>
-                    <td class="text-end">
-                        <a href="#" class="btn btn-sm btn-outline-warning">Execute</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        <i class="bi bi-info-circle me-1"></i> No active arbitrage opportunities found right now. Check back shortly.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+    <script>
+        // Optional JavaScript snippet to poll backend for real-time updates every 3 seconds
+        setInterval(async () => {
+            try {
+                let response = await fetch('/api/position-metrics/');
+                let data = await response.json();
+                
+                document.getElementById('live-status').innerText = data.status;
+                document.getElementById('live-spot').innerText = data.spot_holdings + " BTC";
+                document.getElementById('live-futures').innerText = data.futures_size + " BTC";
+                
+                let pnlElement = document.getElementById('live-pnl');
+                pnlElement.innerText = "$" + data.unrealized_pnl.toFixed(2);
+                if (data.unrealized_pnl >= 0) {
+                    pnlElement.className = "fs-4 fw-bold text-success mb-0";
+                } else {
+                    pnlElement.className = "fs-4 fw-bold text-danger mb-0";
+                }
+            } catch (err) {
+                console.error("Failed to fetch live position telemetry", err);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

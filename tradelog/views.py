@@ -14,6 +14,10 @@ from google import genai
 from django.shortcuts import render
 from funding_scanner import fetch_binance_funding_rates
 
+from django.http import JsonResponse
+# Assuming your exchange instance is initialized globally or via a helper
+from .execution_engine import RealTimeArbitrageExecutor
+
 
 # Models
 from .models import Crypto, UserProfile, TradeJournal, TradeChartImage
@@ -270,3 +274,19 @@ def dashboard(request):
         'arbitrage_opportunities': arbitrage_opportunities,
     }
     return render(request, 'tradelog/dashboard.html', context)
+
+
+
+def get_arbitrage_status(data):
+    # Fetch live position details from Binance
+    # engine.exchange.fetch_positions(['BTC/USDT'])
+    
+    status_data = {
+        "status": "ACTIVE",
+        "symbol": "BTC/USDT",
+        "spot_balance": 0.0009,
+        "futures_size": -0.0010,
+        "unrealized_pnl": -0.05,
+        "funding_collected": 0.012,
+    }
+    return JsonResponse(status_data)
