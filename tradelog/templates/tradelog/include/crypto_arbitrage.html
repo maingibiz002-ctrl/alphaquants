@@ -24,14 +24,14 @@
                 {% for item in arbitrage_opportunities %}
                 <tr>
                     <td class="fw-bold text-white">{{ item.symbol }}</td>
-                    <td class="{% if item.rate >= 0 %}text-success{% else %}text-danger{% endif %}">
-                        {{ item.rate }}%
+                    <td class="{% if item.funding_rate_8h_% >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ item.funding_rate_8h_% }}%
                     </td>
-                    <td>{{ item.apr }}%</td>
+                    <td>{{ item.annualized_apr_% }}%</td>
                     <td>
-                        <span class="badge bg-secondary text-light">{{ item.strategy }}</span>
+                        <span class="badge bg-secondary text-light">{{ item.recommended_strategy }}</span>
                     </td>
-                    <td class="text-muted small">{{ item.settlement_time }}</td>
+                    <td class="text-muted small">{{ item.next_funding_time }}</td>
                     <td class="text-end">
                         <a href="#" class="btn btn-sm btn-outline-warning">Execute</a>
                     </td>
