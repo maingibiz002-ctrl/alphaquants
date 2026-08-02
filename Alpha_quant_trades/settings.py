@@ -65,7 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'alpha_quant_trades.urls'
+ROOT_URLCONF = 'Alpha_quant_trades.urls'
 
 TEMPLATES = [
     {
@@ -82,7 +82,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'alpha_quant_trades.wsgi.application'
+WSGI_APPLICATION = 'Alpha_quant_trades.wsgi.application'
 
 
 # Database
