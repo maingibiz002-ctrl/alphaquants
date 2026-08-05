@@ -66,3 +66,30 @@ if __name__ == '__main__':
     print("\nExecution Results:")
     for log in logs:
         print(log)
+
+import os
+import django
+
+# Setup Django environment so this standalone script can talk to the database
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'alpha_quant_trades.settings') # Replace with your exact settings module if named differently
+django.setup()
+
+from tradelog.models import ExecutedTrade
+
+def log_trade_to_db(leg_name, symbol, amount, price, order_id):
+    """Saves an executed trade leg to the database for dashboard telemetry."""
+    ExecutedTrade.objects.create(
+        leg=leg_name,
+        symbol=symbol,
+        amount=amount,
+        price=price if price else 0.0,
+        order_id=order_id,
+        status="Filled"
+    )
+    print(f"[Database] Successfully logged {leg_name} for {symbol} to dashboard.")
+
+if __name__ == "__main__":
+    print("[System] Initialized demo execution pipeline...")
+    # Example test injection when run directly:
+    # log_trade_to_db("Leg 1 (Spot)", "BTC/USDT", 0.0009, 63715.45, "53816960230")
+    # log_trade_to_db("Leg 2 (Futures)", "BTC/USDT", 0.0009, 63708.40, "27965855262")

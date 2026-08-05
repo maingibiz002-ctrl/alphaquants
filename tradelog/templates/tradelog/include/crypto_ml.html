@@ -1,0 +1,97 @@
+<!-- tradelog/templates/tradelog/include/crypto_ml.html -->
+<div id="crypto-ml-section" class="tab-content-area d-none">
+    <h2 class="fw-bold text-white mb-1">Crypto ML Models</h2>
+    <p class="text-secondary small mb-4">Predictive Machine Learning Models & Signal Generation</p>
+    <div class="aq-card p-4">
+        <div class="glass-card mb-4 p-4 border border-secondary rounded bg-black">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold text-white mb-1"><i class="bi bi-cpu-fill text-warning me-2"></i> Crypto ML Models & Signal Generation</h5>
+                    <p class="text-secondary small mb-0">Real-time predictive inference, feature matrices, and automated algorithmic signal triggers.</p>
+                </div>
+                <span class="badge bg-warning text-dark font-monospace px-3 py-2">MODELS ACTIVE</span>
+            </div>
+        </div>
+
+        <!-- ML METRICS ROW -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="glass-card p-3 border border-secondary rounded bg-black">
+                    <span class="text-secondary small d-block mb-1">ACTIVE INFERENCE MODELS</span>
+                    <h3 class="fw-bold text-white mb-0">4 Models</h3>
+                    <span class="text-success small"><i class="bi bi-caret-up-fill"></i> XGBoost, LSTM, Random Forest, Transformer</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-3 border border-secondary rounded bg-black">
+                    <span class="text-secondary small d-block mb-1">AGGREGATE PREDICTIVE ACCURACY</span>
+                    <h3 class="fw-bold text-success mb-0">68.4%</h3>
+                    <span class="text-muted small">Evaluated over rolling 24h window</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-3 border border-secondary rounded bg-black">
+                    <span class="text-secondary small d-block mb-1">ACTIVE SIGNAL GENERATED</span>
+                    <h3 class="fw-bold text-warning mb-0">LONG (BTC/USDT)</h3>
+                    <span class="text-info small">Confidence Score: 0.84</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIVE MODEL SIGNALS TABLE -->
+        <div class="glass-card p-4 border border-secondary rounded bg-black">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-white fw-bold mb-0">
+                    <i class="bi bi-graph-up-arrow me-2 text-info"></i> Latest Model Predictions & Probability Matrix
+                </h6>
+                <span class="badge bg-dark border border-secondary text-light">Auto-Refreshing (3s)</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-secondary small">
+                            <th>PAIR</th>
+                            <th>MODEL ARCHITECTURE</th>
+                            <th>DIRECTION</th>
+                            <th>CONFIDENCE</th>
+                            <th>PREDICTED RETURN (4H)</th>
+                            <th class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ml-signals-tbody">
+                        <tr>
+                            <td class="fw-bold text-white">BTCUSDT</td>
+                            <td><span class="badge bg-dark border border-info text-info">LSTM Sequence</span></td>
+                            <td><span class="text-success fw-bold">LONG</span></td>
+                            <td>84.2%</td>
+                            <td class="text-success">+1.45%</td>
+                            <td class="text-end">
+                                <a href="{% url 'execute_arbitrage' 'BTCUSDT' %}" class="btn btn-sm btn-outline-warning">Deploy Bot</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-white">ETHUSDT</td>
+                            <td><span class="badge bg-dark border border-warning text-warning">XGBoost Regressor</span></td>
+                            <td><span class="text-success fw-bold">LONG</span></td>
+                            <td>79.1%</td>
+                            <td class="text-success">+1.12%</td>
+                            <td class="text-end">
+                                <a href="{% url 'execute_arbitrage' 'ETHUSDT' %}" class="btn btn-sm btn-outline-warning">Deploy Bot</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-white">SOLUSDT</td>
+                            <td><span class="badge bg-dark border border-danger text-danger">Transformer Attention</span></td>
+                            <td><span class="text-danger fw-bold">SHORT</span></td>
+                            <td>73.5%</td>
+                            <td class="text-danger">-0.95%</td>
+                            <td class="text-end">
+                                <a href="{% url 'execute_arbitrage' 'SOLUSDT' %}" class="btn btn-sm btn-outline-warning">Deploy Bot</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

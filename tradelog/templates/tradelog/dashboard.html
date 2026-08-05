@@ -19,12 +19,12 @@
         </div>
     </div>
 
+    <!-- 2. Crypto ML / Arbitrage Execution Section (Hidden by default using d-none) -->
     <div id="crypto-ml-section" class="tab-content-area d-none">
-        <div class="glass-card p-4">
-            <h5 class="fw-bold text-white">Crypto ML Models</h5>
-            <p class="text-secondary small mb-0">Predictive Machine Learning Models & Signal Generation</p>
-        </div>
+        {% include "tradelog/include/crypto_ml.html" %}
     </div>
+
+
 
     <div id="portfolio-management-section" class="tab-content-area d-none">
         <div class="glass-card p-4">
@@ -67,33 +67,32 @@
 
 {% block extra_js %}
 <script>
-    // Tab switching logic for both sidebar links and workspace buttons
-    function switchTab(event, sectionId) {
-        if (event) {
-            event.preventDefault();
-        }
-        
-        // 1. Hide all sections using d-none
-        const sections = document.querySelectorAll('.tab-content-area');
-        sections.forEach(el => {
-            el.classList.add('d-none');
-            el.style.display = ''; // Clear inline styles if any exist
-        });
-        
-        // 2. Reveal the targeted section
-        const targetSection = document.getElementById(sectionId);
-        if (targetSection) {
-            targetSection.classList.remove('d-none');
-        } else {
-            console.error(`Target section #${sectionId} not found in DOM.`);
-        }
-        
-        // 3. Update sidebar link active highlighting
-        if (event && event.currentTarget) {
-            document.querySelectorAll('.nav-link-custom').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
+  function switchTab(event, sectionId) {
+    event.preventDefault(); 
+    console.log("Switching tab to:", sectionId);
+
+    // Hide all tab areas
+    document.querySelectorAll('.tab-content-area').forEach(el => {
+        el.classList.add('d-none');
+    });
+
+    // Show target area
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('d-none');
+        console.log("Successfully displayed:", sectionId);
+    } else {
+        console.error("CRITICAL: Element ID not found in DOM:", sectionId);
     }
+
+    // Toggle active classes on sidebar
+    document.querySelectorAll('.nav-link-custom').forEach(el => {
+        el.classList.remove('active');
+    });
+    if (event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+}
 
     // Consolidated workspace switcher
     function switchWorkspace(targetId, btnElement) {
@@ -106,4 +105,6 @@
         }
     }
 </script>
+
+
 {% endblock %}

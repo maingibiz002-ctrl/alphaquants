@@ -9,5 +9,6 @@ urlpatterns = [
     path('screener/', views.crypto_screener_view, name='crypto_screener'),
     path('api/ask-crypto-ai/', views.ask_crypto_ai, name='ask_crypto_ai'),
     path('api/arbitrage-data/', views.arbitrage_data_api, name='arbitrage_data_api'),
+    path('execute/<str:symbol>/', views.execute_arbitrage_view, name='execute_arbitrage'),
     
 ]
